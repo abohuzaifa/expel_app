@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\WishListController;
 use App\Http\Controllers\Admin\PaymentController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\MessageController;
+use App\Http\Controllers\Admin\RequestController;
 use App\Http\Controllers\Admin\WalletController;
 use App\Http\Controllers\BannerController;
 use App\Http\Controllers\Location;
@@ -46,6 +47,9 @@ Route::get('/adminChoiceCategories', [CategoryController::class,'adminChoiceCate
 
 // protected routes
 Route::group(["middleware"=> "auth:sanctum"], function () {
+    // Requests
+    Route::post('/createRequest', [RequestController::class, 'createRequest'])->name('createRequest');
+
     // User requests
     Route::get("/user", [AuthController::class,"user"])->name('user');
     Route::get("/logout", [AuthController::class,"logout"])->name('logout');

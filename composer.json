@@ -6,12 +6,14 @@
     "license": "MIT",
     "require": {
         "php": ">=8.1.0",
+        "beyondcode/laravel-websockets": "^1.14",
         "guzzlehttp/guzzle": "^7.2",
         "laravel/framework": "^9.19",
         "laravel/sanctum": "^3.3",
         "laravel/tinker": "^2.7",
         "laravel/ui": "^4.4",
-        "laravelcollective/html": "*"
+        "laravelcollective/html": "*",
+        "pusher/pusher-php-server": "^7.2"
     },
     "require-dev": {
         "fakerphp/faker": "^1.9.1",
