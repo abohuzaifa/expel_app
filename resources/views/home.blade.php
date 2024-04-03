@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
+
 <div class="content-wrapper">
     <section class="content">
         <div class="container-fluid" style="width:100%">
@@ -617,3 +618,17 @@
         </div>
 
 @endsection
+
+
+<script>
+
+// window.Echo.channel('AppChannel_8')
+// .listen('.myNotify', (e) => {
+//   console.log(e);
+// })
+    window.Echo.channel('AppChannel_8')
+    .listen('.App\\Events\\AppWebsocket', (e) => {
+        console.log(e);
+    });
+
+</script>

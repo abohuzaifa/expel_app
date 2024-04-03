@@ -27,7 +27,10 @@ use App\Http\Controllers\Location;
 |
 */
 // public routes
+Route::post("/msg", [RequestController::class,"sendMessage"])->name('sendMessage');
 Route::post("/register", [AuthController::class,"register"])->name('register');
+Route::post("/createDriver", [AuthController::class,"createDriver"])->name('createDriver');
+Route::get("/bankList", [AuthController::class,"bankList"])->name('bankList');
 Route::post("/sellerRegister", [AuthController::class,"sellerRegister"])->name('sellerRegister');
 Route::post("/login", [AuthController::class,"login"])->name('login');
 Route::post("/reset", [AuthController::class,"reset"])->name('reset');

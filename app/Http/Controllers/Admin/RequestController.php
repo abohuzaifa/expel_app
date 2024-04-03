@@ -50,4 +50,10 @@ class RequestController extends Controller
             return response()->json(['msg' => 'Something went wrong']);
         }
     }
+
+    public function sendMessage()
+    {
+        $channel = 'AppChannel_8';
+            var_dump(event(new AppWebsocket($channel, "Request Created Successfully", 1, 0)));
+    }
 }

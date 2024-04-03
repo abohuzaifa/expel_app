@@ -42,4 +42,9 @@ class AppWebsocket implements ShouldBroadcast
     {
         return new Channel($this->channel);
     }
+
+    public function broadcastAs()
+    {
+        return 'myNotify';
+    }
 }

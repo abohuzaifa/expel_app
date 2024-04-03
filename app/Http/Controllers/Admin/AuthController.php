@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Bank;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
@@ -68,6 +69,56 @@ class AuthController extends Controller
         
     }
 
+    public function bankList()
+    {
+        $banks = Bank::where('status', 1)->get();
+        return response()->json(['banks' => $banks]);
+    }
+    public function createDriver(Request $req)
+    {
+        $attrs = $req->validate([
+            "name"=> "required|string",
+            "email"=> "required|email|unique:users,email",
+            "password"=> "required|min:6|confirmed",
+            'mobile' => 'required|unique:users',
+            'user_type'=> 'required|int',
+            'vehicle_type' => 'required|int',
+            'driving_license' => 'required',
+            'bank_id' => 'required|int',
+            'bank_account' => 'required',
+
+        ]);
+        $randomNumber = rand(100000, 999999);
+        $user = User::create([
+            "name"=> $attrs["name"],
+            "email"=> $attrs["email"],
+            "mobile" => $attrs["mobile"],
+            "user_type" => $attrs['user_type'],
+            "password"=> bcrypt($attrs["password"]),
+            "otp"=> $randomNumber,
+            "street_address" => $req->address,
+            "status"=> 1,
+            "category_id" => $req->vehicle_type,
+            "driving_license" => $req->driving_license,
+            "bank_id" => $req->bank_id,
+            "bank_account" => $req->bank_account,
+            "name_ar" => $req->name_ar,
+        ]);
+        if($user)
+        {
+            Wallet::create([
+                'user_id' => $user->id
+            ]);
+            return response([
+                'users' => $user,
+                'token' => $user->createToken('secret')->plainTextToken,
+            ]);
+        } else {
+            return response([
+                "message" => "Something went wrong."
+            ]);
+        }
+    }
     //Register User
     public function sellerRegister(Request $request)
     {

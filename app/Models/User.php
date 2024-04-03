@@ -28,7 +28,11 @@ class User extends Authenticatable
         'status',
         'address',
         'country',
-        'otp'
+        'otp',
+        'category_id',
+        'driving_license',
+        'bank_id',
+        'bank_account'
     ];
 
     /**
