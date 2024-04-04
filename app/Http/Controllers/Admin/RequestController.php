@@ -56,4 +56,21 @@ class RequestController extends Controller
         $channel = 'AppChannel_8';
             var_dump(event(new AppWebsocket($channel, "Request Created Successfully", 1, 0)));
     }
+
+    public function allTrips()
+    {
+        $requests = ModelRequest::where('status', 0)->paginate(20);
+        return response()->json(['all_trips' => $requests]);
+    }
+
+    public function getRequest(Request $req)
+    {
+        $attrs = $req->validate([
+            'id' => 'required|int'
+        ]);
+
+        $requestWithUser = ModelRequest::with('user:id,name')->find($req->id);
+
+        return response()->json(['requestData' => $requestWithUser]);
+    }
 }

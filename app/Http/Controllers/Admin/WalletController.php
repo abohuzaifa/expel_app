@@ -124,6 +124,29 @@ class WalletController extends Controller
 
     }
 
+    public function getWalletSummary()
+    {
+        $user = auth()->user();
+        $wallet = Wallet::where('user_id', $user->id)->first();
+        $deposits = WalletHistory::where('wallet_id', $wallet->id)
+            ->where('is_deposite', 1)
+            ->sum('amount');
+
+        $expenses = WalletHistory::where('wallet_id', $wallet->id)
+            ->where('is_expanse', 1)
+            ->sum('amount');
+
+        $recentEntry = WalletHistory::where('wallet_id', $wallet->id)->where('is_deposite', 1)
+            ->orderBy('created_at', 'desc')
+            ->first();
+        
+            return response()->json([
+                'earnings' => $deposits,
+                'withdral' => $expenses,
+                'balance' => $wallet->amount,
+                'current_earning' => $recentEntry->amount
+            ]);
+    }
     public function wallet()
     {
         $wallet = DB::table('wallets')->where("user_id", auth()->user()->id)->get();

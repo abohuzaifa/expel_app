@@ -11,7 +11,9 @@ use App\Http\Controllers\Admin\WishListController;
 use App\Http\Controllers\Admin\PaymentController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\MessageController;
+use App\Http\Controllers\Admin\OfferController;
 use App\Http\Controllers\Admin\RequestController;
+use App\Http\Controllers\Admin\TripController;
 use App\Http\Controllers\Admin\WalletController;
 use App\Http\Controllers\BannerController;
 use App\Http\Controllers\Location;
@@ -52,6 +54,12 @@ Route::get('/adminChoiceCategories', [CategoryController::class,'adminChoiceCate
 Route::group(["middleware"=> "auth:sanctum"], function () {
     // Requests
     Route::post('/createRequest', [RequestController::class, 'createRequest'])->name('createRequest');
+    Route::get('/allTrips', [RequestController::class, 'allTrips'])->name('allTrips');
+    Route::post('/getRequest', [RequestController::class, 'getRequest'])->name('getRequest');
+
+    Route::post('/addTrip', [TripController::class, 'addTrip'])->name('addTrip');
+
+    Route::post('/addOffer', [OfferController::class, 'addOffer'])->name('addOffer');
 
     // User requests
     Route::get("/user", [AuthController::class,"user"])->name('user');
@@ -134,5 +142,6 @@ Route::group(["middleware"=> "auth:sanctum"], function () {
     Route::get("/walletHistory", [WalletController::class, 'walletHistory'])->name('walletHistory');
     Route::get("/walletNotification", [WalletController::class, 'walletNotification'])->name('walletNotification');
     Route::get("/walletReadNotify/{flag}", [WalletController::class, 'walletReadNotify'])->name('walletReadNotify');
+    Route::get("/getWalletSummary", [WalletController::class, 'getWalletSummary'])->name('getWalletSummary');
 
 });
