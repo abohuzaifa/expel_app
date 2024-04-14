@@ -25,11 +25,27 @@ class RequestController extends Controller
             'receiver_mobile' => 'required'
         ]);
 
+        $images = [];
+        if(isset($_FILES['images']))
+        {
+            // print_r($_FILES['images']); exit;
+            if ($req->hasFile('images')) {
+                foreach ($req->file('images') as $image) {
+                    
+                    $imageName = time() . '_' . $image->getClientOriginalName();
+                    $image->move(public_path('images'), $imageName);
+                    // You may also store the image information in the database if needed.
+                    $images[] = $imageName;
+                }
+    
+            }
+        }
         $user = auth()->user();
         $request = ModelRequest::create([
             'user_id' => $user->id,
             'from_date' => $req->from_date,
             'to_date' => $req->to_date,
+            'images' => json_encode($images),
             'parcel_lat' => $req->parcel_lat,
             'parcel_long' => $req->parcel_long,
             'parcel_address' => $req->parcel_address,
