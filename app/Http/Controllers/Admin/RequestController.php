@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Admin;
 
 use App\Events\AppWebsocket;
 use App\Http\Controllers\Controller;
+use App\Models\Offer;
 use App\Models\Request as ModelRequest;
+use GuzzleHttp\Client;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -73,4 +75,89 @@ class RequestController extends Controller
 
         return response()->json(['requestData' => $requestWithUser]);
     }
+    public function rooteTimeAndDuration(Request $req)
+    {
+        $data = $req->validate([
+            'origin' => 'required',
+            'destination' => 'required'
+        ]);
+        $origin =  $req->origin;     //"Gaggoo, Vehari, Punjab, Pakistan"; // You can also use latitude and longitude here
+        $destination =  $req->destination;    //"Burewala, Vehari, Punjab, Pakistan"; // You can also use latitude and longitude here
+
+        return $this->calculateDistanceAndTime($origin, $destination);
+    }
+    public function calculateDistanceAndTime($origin, $destination) //calculateDistanceAndTime($originLat, $originLng, $destLat, $destLng)
+    {
+        $client = new Client();
+        $response = $client->get('https://maps.googleapis.com/maps/api/distancematrix/json', [
+            'query' => [
+                'origins' => $origin,//$originLat.','.$originLng,
+                'destinations' => $destination,//$destLat.','.$destLng,
+                'mode' => 'driving',
+                'key' => env('GOOGLE_DISTANCE_MATRIX_API_KEY'),
+            ]
+        ]);
+
+        $data = json_decode($response->getBody(), true);
+        // echo "<pre>";    print_r($data); exit;
+        // Check if the response status is OK
+        if ($data['status'] == 'OK') {
+            // Extract distance in meters
+            $distance = $data['rows'][0]['elements'][0]['distance']['value'];
+            // echo "<pre>";    print_r($data); exit;
+            // Convert distance to kilometers
+            $distanceInKm = $distance / 1000;
+            // echo $distanceInKm; exit;
+            // Extract duration in seconds
+            $duration = $data['rows'][0]['elements'][0]['duration']['value'];
+
+            // Convert duration to minutes
+            $durationInMinutes = $duration / 60;
+
+            // Extract the estimated arrival time
+            $arrivalTime = now()->addMinutes($durationInMinutes);
+
+            return response()->json([
+                'distance' => $distanceInKm, // Distance in kilometers
+                'duration' => $durationInMinutes, // Duration in minutes
+                'arrival_time' => $arrivalTime, // Estimated arrival time
+            ]);
+        } else {
+            // If the response status is not OK, return an error
+            return response()->json(['error' => 'Unable to calculate distance and time.']);
+        }
+    }
+    function calculateDistance($lat1, $lon1, $lat2, $lon2) {
+        $earthRadius = 6371; // Radius of the Earth in kilometers
+    
+        $lat1Rad = deg2rad($lat1);
+        $lon1Rad = deg2rad($lon1);
+        $lat2Rad = deg2rad($lat2);
+        $lon2Rad = deg2rad($lon2);
+    
+        $latDifference = $lat2Rad - $lat1Rad;
+        $lonDifference = $lon2Rad - $lon1Rad;
+    
+        $a = sin($latDifference / 2) * sin($latDifference / 2) +
+             cos($lat1Rad) * cos($lat2Rad) *
+             sin($lonDifference / 2) * sin($lonDifference / 2);
+        $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
+    
+        $distance = $earthRadius * $c; // Distance in kilometers
+    
+        return $distance;
+    }
+
+    public function offerList(Request $req)
+    {
+        $attrs = $req->validate([
+            'request_id' => 'required|int'
+        ]);
+
+        $offers = Offer::with('user')->where('request_id', $req->request_id)->get();
+        return response()->json([
+            'offers' => $offers
+        ]);
+    }
+    
 }

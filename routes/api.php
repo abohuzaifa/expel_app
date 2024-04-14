@@ -48,7 +48,7 @@ Route::post("/searchProduct", [ProductController::class, 'searchProduct'])->name
 Route::get("/getBanners", [BannerController::class, 'getBanners'])->name('getBanners');
 Route::get('/getCategory/{id}', [CategoryController::class, 'getCategory'])->name('getCategory');
 Route::get('/adminChoiceCategories', [CategoryController::class,'adminChoiceCategories'])->name('adminChoiceCategories');
-
+Route::post('/test', [RequestController::class, 'test'])->name('test');
 
 // protected routes
 Route::group(["middleware"=> "auth:sanctum"], function () {
@@ -56,6 +56,8 @@ Route::group(["middleware"=> "auth:sanctum"], function () {
     Route::post('/createRequest', [RequestController::class, 'createRequest'])->name('createRequest');
     Route::get('/allTrips', [RequestController::class, 'allTrips'])->name('allTrips');
     Route::post('/getRequest', [RequestController::class, 'getRequest'])->name('getRequest');
+    Route::post('/offerList', [RequestController::class, 'offerList'])->name('offerList');
+    Route::post('/rooteTimeAndDuration', [RequestController::class, 'rooteTimeAndDuration'])->name('rooteTimeAndDuration');
 
     Route::post('/addTrip', [TripController::class, 'addTrip'])->name('addTrip');
 
