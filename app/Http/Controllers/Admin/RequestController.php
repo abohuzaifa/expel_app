@@ -57,7 +57,7 @@ class RequestController extends Controller
         if($request)
         {
             $channel = 'AppChannel_'.$request->id;
-            event(new AppWebsocket($channel, "Request Created Successfully", $user->id, 0));
+            // event(new AppWebsocket($channel, "Request Created Successfully", $user->id, 0));
            
                 DB::table('requests')->where('id', $request->id)->update(['channel_name' => $channel]);
                 $request->channel_name = $channel;

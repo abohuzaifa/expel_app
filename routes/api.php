@@ -66,7 +66,7 @@ Route::group(["middleware"=> "auth:sanctum"], function () {
     // User requests
     Route::get("/user", [AuthController::class,"user"])->name('user');
     Route::get("/logout", [AuthController::class,"logout"])->name('logout');
-    Route::get('/deleteUser/{id}', [AuthController::class, 'delete'])->name('deleteUser');
+    Route::get('/deleteUser', [AuthController::class, 'delete'])->name('deleteUser');
     Route::get('/userList/{id}', [AuthController::class,'userList'])->name('userList');
     Route::post('/updateUser', [AuthController::class,'updateUser'])->name('updateUser');
     Route::post('/setLocation', [AuthController::class, 'setLocation'])->name('setLocation');
@@ -74,6 +74,7 @@ Route::group(["middleware"=> "auth:sanctum"], function () {
     Route::post('/cardDetail', [AuthController::class, 'cardDetail'])->name('cardDetail');
     Route::post('/cardDetailUpdate/{id}', [AuthController::class, 'cardDetailUpdate'])->name('cardDetailUpdate');
     Route::post('/deleteCardDetails/{id}', [AuthController::class, 'deleteCardDetails'])->name('deleteCardDetails');
+    Route::post('/updateVehicle', [AuthController::class, 'updateVehicle'])->name('updateVehicle');
 
 
     // Categories requests

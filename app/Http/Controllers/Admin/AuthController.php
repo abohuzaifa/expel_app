@@ -74,6 +74,22 @@ class AuthController extends Controller
         $banks = Bank::where('status', 1)->get();
         return response()->json(['banks' => $banks]);
     }
+    public function updateVehicle(Request $req)
+    {
+        $attrs = $req->validate([
+            'number_plate' => 'required',
+            'vehicle_type' => 'required|int',
+            'driving_license' => 'required',
+        ]);
+
+        $update = DB::table('users')->where('id', auth()->user()->id)->update([
+            'number_plate' => $req->number_plate,
+            'category_id' => $req->vehicle_type,
+            'driving_license' => $req->driving_license,
+        ]);
+
+        return response()->json(['success' => 'success']);
+    }
     public function createDriver(Request $req)
     {
         $attrs = $req->validate([
@@ -441,15 +457,15 @@ class AuthController extends Controller
 
         return $imageName;
     }
-    public function delete($id)
+    public function delete()
     {
-        $user = User::find( $id );
-        $categories = DB::select('SELECT id FROM categories WHERE created_by=:uid', [':uid'=> auth()->user()->id]);
-        $shops = DB::select('SELECT id FROM shops WHERE created_by=:uid', [':uid'=> auth()->user()->id]);
-        $products = DB::select('SELECT id FROM products WHERE created_by=:uid', [':uid'=> auth()->user()->id]);
+        $user = User::find(auth()->user()->id);
+        // $categories = DB::select('SELECT id FROM categories WHERE created_by=:uid', [':uid'=> auth()->user()->id]);
+        // $shops = DB::select('SELECT id FROM shops WHERE created_by=:uid', [':uid'=> auth()->user()->id]);
+        // $products = DB::select('SELECT id FROM products WHERE created_by=:uid', [':uid'=> auth()->user()->id]);
         // print_r($categories); exit;
         if($user){
-            if(count($categories) == 0 && count($shops) == 0 && count($products) == 0 && $user->delete())
+            if($user->delete())
             {
                 return response([
                     'status'=> 'success',
