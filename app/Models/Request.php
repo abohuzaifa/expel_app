@@ -33,4 +33,8 @@ class Request extends Model
     {
         return $this->belongsTo(User::class);
     }
+    public function offers()
+    {
+        return $this->hasMany(Offer::class, 'request_id');
+    }
 }

@@ -24,8 +24,14 @@ class Offer extends Model
     protected $hidden = [
     ];
 
+    public function request()
+    {
+        return $this->belongsTo(Request::class, 'request_id');
+    }
+
+    // Relationship to User
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id');
     }
 }

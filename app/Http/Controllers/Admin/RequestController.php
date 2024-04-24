@@ -170,7 +170,26 @@ class RequestController extends Controller
             'request_id' => 'required|int'
         ]);
 
-        $offers = Offer::with('user')->where('request_id', $req->request_id)->get();
+        $offers = Offer::with([
+                    'request' => function($query) {
+                        $query->select('id', 'user_id', 'parcel_lat', 'parcel_long', 'parcel_address');
+                            // ->with(['user' => function($query) {
+                            //     $query->select('id', 'name', 'email', 'mobile');  // Specify columns for the user related to the request
+                            // }]);
+                    },
+                    'user' => function($query) {
+                        $query->select('id', 'name', 'email', 'mobile', 'latitude', 'longitude', 'street_address'); // Specify columns for the user related to the offer
+                    }
+                ])
+                ->get();
+        if(count($offers) > 0)
+        {
+            foreach($offers as $key => $offer)
+            {
+
+                $offers[$key]['data'] = $this->calculateDistanceAndTime($offer->request->parcel_address, $offer->user->street_address);
+            }
+        }
         return response()->json([
             'offers' => $offers
         ]);

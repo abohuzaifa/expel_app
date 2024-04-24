@@ -318,18 +318,26 @@ class AuthController extends Controller
         ]);
 
        $user = User::where('mobile', $attrs['mobile'])->first();
-    //    print_r($user->mobile); exit;
-    if($user->user_type == 1 && $user->status == 0)
-    {
-        return response([
-            'message' => "Your account is inactive pls contact to the support to make active your account.",
-        ], 403);
-    } else if($user->user_type == 2 && $user->status == 0)
-    {
-        return response([
-            'message' => "Your account status is inactive pls contact to the support to make active your account.",
-        ], 403);
-    }
+        //    print_r($user); exit;
+        if($user)
+        {
+            if($user->user_type == 1 && $user->status == 0)
+            {
+                return response([
+                    'message' => "Your account is inactive pls contact to the support to make active your account.",
+                ], 403);
+            } else if($user->user_type == 2 && $user->status == 0)
+            {
+                return response([
+                    'message' => "Your account status is inactive pls contact to the support to make active your account.",
+                ], 403);
+            }
+        } else {
+            return response([
+                'message' => "User not found.",
+            ], 403);
+        }
+    
        if(!Auth::attempt($attrs)) {
         return response([
             'message' => "Invalid Credentials.",
