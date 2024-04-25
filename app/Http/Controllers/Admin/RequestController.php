@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Events\AppWebsocket;
 use App\Http\Controllers\Controller;
 use App\Models\Offer;
+use App\Models\PaymentMethod;
 use App\Models\Request as ModelRequest;
 use GuzzleHttp\Client;
 use Illuminate\Http\Request;
@@ -75,11 +76,11 @@ class RequestController extends Controller
             var_dump(event(new AppWebsocket($channel, "Request Created Successfully", 1, 0)));
     }
 
-    public function allTrips()
-    {
-        $requests = ModelRequest::where('status', 0)->paginate(20);
-        return response()->json(['all_trips' => $requests]);
-    }
+    // public function allTrips()
+    // {
+    //     $requests = ModelRequest::where('status', 0)->paginate(20);
+    //     return response()->json(['all_trips' => $requests]);
+    // }
 
     public function getRequest(Request $req)
     {
@@ -194,5 +195,62 @@ class RequestController extends Controller
             'offers' => $offers
         ]);
     }
-    
+
+    public function acceptOffer(Request $req)
+    {
+        $data = $req->validate([
+            'amount' => 'required',
+            'request_id' => 'required',
+            'offer_id' => 'required',
+            'card' => 'required',
+            'description' => 'required'
+        ]);
+
+        $pm = PaymentMethod::where('slug', 'click_pay')->first();
+        // print_r($pm);
+        $data['profile_key'] = $pm->public_key;
+        $data['secret_key'] = $pm->secret_key;
+
+        $payment = Offer::clickPay($data);
+        $payment = json_decode($payment, true);
+        // print_r($payment); exit;
+        if(isset($payment['invoice_id']))
+        {
+            $request = DB::table('requests')->where('id', $req->request_id)->update([
+                'invoice_id' => $payment['invoice_id'],
+                'amount' => $req->amount
+            ]);
+            if($request)
+            {
+                return response()->json(['data' => $payment]);
+            } else {
+                return response()->json(['msg' => "Update method fails"]);
+            }
+        } else {
+            return response()->json(['msg' => "Something Wrong in request."]);
+        }
+
+
+
+    }
+
+    public function getRequestData($id)
+    {
+        $request = ModelRequest::find($id);
+
+        return response()->json(['data' => $request]);
+    }
+    public function allTrips()
+    {
+        $user = auth()->user();
+
+        $requests = ModelRequest::with('user')->paginate(10);
+
+        return response()->json(['data' => $requests]);
+    }
 }
+
+
+//ALTER TABLE `requests` ADD `payment_status` INT NOT NULL DEFAULT '0' COMMENT '0: Pending payment, 1: payment Done' AFTER `status`;
+//ALTER TABLE `requests` ADD `invoice_id` VARCHAR(255) NULL AFTER `payment_status`;
+//ALTER TABLE `requests` ADD `amount` DOUBLE NOT NULL DEFAULT '0' AFTER `payment_status`;

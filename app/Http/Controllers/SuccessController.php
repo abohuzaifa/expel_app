@@ -13,35 +13,39 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\PaymentMethod;
 use App\Models\CardDetail;
+use App\Models\Request as ModelsRequest;
 use App\Models\Wallet;
 use App\Models\WalletHistory;
 
 class SuccessController extends Controller
 {
     //
-    public function index($id)
+    public function index($id, $offer_id)
     {
         // echo $id; exit;
         $id = base64_decode($id);
-        $order = Order::find($id);
-        $pm = PaymentMethod::find($order->payment_method);
+        $offer_id = base64_decode($offer_id);
+
+        $request = ModelsRequest::find($id);
+        $pm = PaymentMethod::where('slug', 'click_pay')->first();
         if($pm->slug == "click_pay"){
             $data['secret_key'] = $pm->secret_key;
-            $data['invoice_id'] = $order->invoice_id;
+            $data['invoice_id'] = $request->invoice_id;
             $status = Order::clickPayOrderStatus($data);
             $status = json_decode($status, true);
+            $data['status'] = 0;
             if(isset($status['invoice_status']) && $status['invoice_status'] == "paid")
             {
+                $data['status'] = 1;
                 // print_r($status); exit;
-                DB::table("orders")->where("id", "=", $order->id)->update([
-                    "order_status" => 2,
-                    "paid" => $order->total,
-                    "due" => 0
+                DB::table("requests")->where("id", "=", $request->id)->update([
+                    "payment_status" => 1,
+                    'offer_id' => $offer_id
                 ]);
             }
 
         }
-        return view('success');
+        return view('success',$data);
     }
 
     public function charge_in($id)

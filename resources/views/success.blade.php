@@ -42,8 +42,8 @@
       <div style="border-radius:200px; height:200px; width:200px; background: #F8FAF5; margin:0 auto;">
         <i class="checkmark">✓</i>
       </div>
-        <h1>{{trans("lang.success")}}</h1> 
-        <p>{{trans("lang.we_received_your_request")}}<br/>{{trans("lang.in_touch_shortly")}}</p>
+        <h1><?= $status == 1 ? trans("lang.success") : trans("lang.failed") ?></h1> 
+        <!-- <p>{{trans("lang.we_received_your_request")}}<br/>{{trans("lang.in_touch_shortly")}}</p> -->
       </div>
  
       @endsection

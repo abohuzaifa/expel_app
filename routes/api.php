@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\ShopController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\CartController;
+use App\Http\Controllers\Admin\HistoryController;
 use App\Http\Controllers\Admin\WishListController;
 use App\Http\Controllers\Admin\PaymentController;
 use App\Http\Controllers\Admin\OrderController;
@@ -58,10 +59,17 @@ Route::group(["middleware"=> "auth:sanctum"], function () {
     Route::post('/getRequest', [RequestController::class, 'getRequest'])->name('getRequest');
     Route::post('/offerList', [RequestController::class, 'offerList'])->name('offerList');
     Route::post('/rooteTimeAndDuration', [RequestController::class, 'rooteTimeAndDuration'])->name('rooteTimeAndDuration');
+    Route::post('/acceptOffer', [RequestController::class, 'acceptOffer'])->name('acceptOffer');
 
     Route::post('/addTrip', [TripController::class, 'addTrip'])->name('addTrip');
 
     Route::post('/addOffer', [OfferController::class, 'addOffer'])->name('addOffer');
+
+
+    // history section 
+    Route::post('/createHistory', [HistoryController::class, 'createHistory'])->name('createHistory');
+    Route::post('/trackParcel', [HistoryController::class, 'trackParcel'])->name('trackParcel');
+
 
     // User requests
     Route::get("/user", [AuthController::class,"user"])->name('user');

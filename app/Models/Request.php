@@ -37,4 +37,7 @@ class Request extends Model
     {
         return $this->hasMany(Offer::class, 'request_id');
     }
+    public function histories() {
+        return $this->hasMany(History::class, 'request_id');
+    }
 }
