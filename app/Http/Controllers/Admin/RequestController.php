@@ -165,37 +165,53 @@ class RequestController extends Controller
         return $distance;
     }
 
-    public function offerList(Request $req)
+    public function offerList()
     {
-        $attrs = $req->validate([
-            'request_id' => 'required|int'
-        ]);
-
-        $offers = Offer::with([
-                    'request' => function($query) {
-                        $query->select('id', 'user_id', 'parcel_lat', 'parcel_long', 'parcel_address');
-                            // ->with(['user' => function($query) {
-                            //     $query->select('id', 'name', 'email', 'mobile');  // Specify columns for the user related to the request
-                            // }]);
-                    },
-                    'user' => function($query) {
-                        $query->select('id', 'name', 'email', 'mobile', 'latitude', 'longitude', 'street_address'); // Specify columns for the user related to the offer
-                    }
-                ])
-                ->get();
-        if(count($offers) > 0)
+        
+        $requestIds = ModelRequest::where('user_id', auth()->user()->id)->where('status', 0)->pluck('id');
+        // print_r($requestIds); exit;
+        $requestIds = json_decode(json_encode($requestIds), true);
+        if(count($requestIds) > 0)
         {
-            foreach($offers as $key => $offer)
+            $offers = Offer::with([
+                'request' => function($query) use ($requestIds) {
+                    $query->select('id', 'user_id', 'parcel_lat', 'parcel_long', 'parcel_address')
+                        ->whereIn('id', $requestIds); // Filter the requests by specified IDs
+                    // If you want to include user data related to the request, uncomment the following:
+                    // ->with(['user' => function($query) {
+                    //     $query->select('id', 'name', 'email', 'mobile');  // Specify columns for the user related to the request
+                    // }]);
+                },
+                'user' => function($query) {
+                    $query->select('id', 'name', 'email', 'mobile', 'latitude', 'longitude', 'street_address');
+                }
+            ])->get();
+    
+            if(count($offers) > 0)
             {
-
-                $offers[$key]['data'] = $this->calculateDistanceAndTime($offer->request->parcel_address, $offer->user->street_address);
+                foreach($offers as $key => $offer)
+                {
+    
+                    $offers[$key]['data'] = $this->calculateDistanceAndTime($offer->request->parcel_address, $offer->user->street_address);
+                }
+                return response()->json([
+                    'offers' => $offers
+                ]);
+            } else {
+                return response()->json([
+                    'msg' => 'No Offer found'
+                ]);
             }
+            
+        } else {
+            return response()->json([
+                'msg' => 'No Offer found'
+            ]);
         }
-        return response()->json([
-            'offers' => $offers
-        ]);
+        
     }
 
+    
     public function acceptOffer(Request $req)
     {
         $data = $req->validate([
@@ -251,6 +267,3 @@ class RequestController extends Controller
 }
 
 
-//ALTER TABLE `requests` ADD `payment_status` INT NOT NULL DEFAULT '0' COMMENT '0: Pending payment, 1: payment Done' AFTER `status`;
-//ALTER TABLE `requests` ADD `invoice_id` VARCHAR(255) NULL AFTER `payment_status`;
-//ALTER TABLE `requests` ADD `amount` DOUBLE NOT NULL DEFAULT '0' AFTER `payment_status`;
