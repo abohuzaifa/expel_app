@@ -270,6 +270,7 @@ class RequestController extends Controller
 
     public function markCompleteRequest(Request $req)
     {
+        print_r(auth()->user()); exit;
         $req->validate([
             'request_id' => 'required|int'
         ]);
@@ -283,6 +284,9 @@ class RequestController extends Controller
             if($request->payment_status == 1)
             {
                 $offer = Offer::find($request->offer_id);
+                if (is_null($offer) || is_null($offer->id)) {
+                    return response()->json(['msg' => 'Offer not found']);
+                }
                 $wallet = Wallet::where('user_id', $offer->user_id)->first();
                 $amount = $wallet->amount+$request->amount;
                 $walletUpdate = DB::table('wallets')->where('id', $wallet->id)->update([
