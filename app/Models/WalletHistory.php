@@ -20,4 +20,8 @@ class WalletHistory extends Model
         'invoice_id',
         'is_read'
     ];
+
+    protected $casts = [
+        'amount' => 'decimal:2',
+    ];
 }
