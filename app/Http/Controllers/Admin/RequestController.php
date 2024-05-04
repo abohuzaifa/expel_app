@@ -187,7 +187,7 @@ class RequestController extends Controller
                     $query->select('id', 'name', 'email', 'mobile', 'latitude', 'longitude', 'street_address');
                 }
             ])->get();
-    
+                print_r($offers); exit;
             if(count($offers) > 0)
             {
                 foreach($offers as $key => $offer)
