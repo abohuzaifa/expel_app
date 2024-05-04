@@ -119,7 +119,7 @@ class RequestController extends Controller
         // echo "<pre>";    print_r($data); exit;
         // Check if the response status is OK
         if ($data['status'] == 'OK') {
-            print_r($data); exit;
+            // print_r($data); exit;
             // Extract distance in meters
             $distance = $data['rows'][0]['elements'][0]['distance']['value'];
             // echo "<pre>";    print_r($data); exit;
@@ -187,7 +187,7 @@ class RequestController extends Controller
                     $query->select('id', 'name', 'email', 'mobile', 'latitude', 'longitude', 'street_address');
                 }
             ])->get();
-                print_r($offers); exit;
+                // print_r($offers); exit;
             if(count($offers) > 0)
             {
                 foreach($offers as $key => $offer)
