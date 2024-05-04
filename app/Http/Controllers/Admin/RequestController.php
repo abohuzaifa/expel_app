@@ -98,18 +98,18 @@ class RequestController extends Controller
             'origin' => 'required',
             'destination' => 'required'
         ]);
-        $origin =  $req->origin;     //"Gaggoo, Vehari, Punjab, Pakistan"; // You can also use latitude and longitude here
-        $destination =  $req->destination;    //"Burewala, Vehari, Punjab, Pakistan"; // You can also use latitude and longitude here
+        // $origin =  $req->origin;     //"Gaggoo, Vehari, Punjab, Pakistan"; // You can also use latitude and longitude here
+        // $destination =  $req->destination;    //"Burewala, Vehari, Punjab, Pakistan"; // You can also use latitude and longitude here
 
-        return $this->calculateDistanceAndTime($origin, $destination);
+        return $this->calculateDistanceAndTime($originLat, $originLng, $destLat, $destLng);
     }
-    public function calculateDistanceAndTime($origin, $destination) //calculateDistanceAndTime($originLat, $originLng, $destLat, $destLng)
+    public function calculateDistanceAndTime($originLat, $originLng, $destLat, $destLng)//calculateDistanceAndTime($origin, $destination) //
     {
         $client = new Client();
         $response = $client->get('https://maps.googleapis.com/maps/api/distancematrix/json', [
             'query' => [
-                'origins' => $origin,//$originLat.','.$originLng,
-                'destinations' => $destination,//$destLat.','.$destLng,
+                'origins' =>  $originLat.','.$originLng, //$origin,//,
+                'destinations' => $destLat.','.$destLng,//$destination,//,
                 'mode' => 'driving',
                 'key' => env('GOOGLE_DISTANCE_MATRIX_API_KEY'),
             ]
@@ -192,7 +192,7 @@ class RequestController extends Controller
                 foreach($offers as $key => $offer)
                 {
     
-                    $offers[$key]['data'] = $this->calculateDistanceAndTime($offer->request->parcel_address, $offer->user->street_address);
+                    $offers[$key]['data'] = $this->calculateDistanceAndTime($offer->request->parcel_lat,$offer->request->parcel_long, $offer->user->latitude, $offer->user->longitude);
                 }
                 return response()->json([
                     'offers' => $offers
