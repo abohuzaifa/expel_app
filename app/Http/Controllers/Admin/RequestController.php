@@ -295,7 +295,7 @@ class RequestController extends Controller
                 if($walletUpdate)
                 {
                     $wallet_history = WalletHistory::create([
-                        'wallet_id' => $wallet['wallet_id'],
+                        'wallet_id' => $wallet->id,
                         'amount' => $request->amount,
                         'is_deposite' => 1,
                         'description' => 'Payment of ride which ID is'.$req->request_id,
