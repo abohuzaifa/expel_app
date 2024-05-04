@@ -119,6 +119,7 @@ class RequestController extends Controller
         // echo "<pre>";    print_r($data); exit;
         // Check if the response status is OK
         if ($data['status'] == 'OK') {
+            print_r($data); exit;
             // Extract distance in meters
             $distance = $data['rows'][0]['elements'][0]['distance']['value'];
             // echo "<pre>";    print_r($data); exit;
