@@ -283,15 +283,48 @@ class WalletController extends Controller
         $user = auth()->user();
         if($user->user_type == 2)
         {
+            $wallet = Wallet::where('user_id', $user->id)->first();
             $offerIds = Offer::where('user_id', $user->id)->pluck('id');
             $offerIds = json_decode(json_encode($offerIds), true);
-
-            $requests = ModelsRequest::whereIn('offer_id', $offerIds)->limit($limit)
-                           ->get(['id', 'offer_id', 'parecel_address', 'receiver_address', 'amount']);
+            if($limit > 0)
+            {
+                $requests = ModelsRequest::whereIn('offer_id', $offerIds)->where('status', 3)->limit($limit)
+                               ->get(['id', 'offer_id', 'parecel_address', 'receiver_address', 'amount']);
+            } else {
+                $requests = ModelsRequest::whereIn('offer_id', $offerIds)->where('status', 3)
+                ->get(['id', 'offer_id', 'parecel_address', 'receiver_address', 'amount']);
+            }
             
-            $totalAmount = ModelsRequest::whereIn('offer_id', $offerIds)->sum('amount');
+            $earning = WalletHistory::where('wallet_id', $wallet->id)->where('is_deposite', 1)->sum('amount');
+            $withDraw = WalletHistory::where('wallet_id', $wallet->id)->where('is_expanse', 1)->sum('amount');
 
-            // $balance = Wallet::
+            return response()->json([
+                'balance' => $wallet->amount,
+                'total_earning' => $earning,
+                'total_withdraw' => $withDraw,
+                'transactions' => $requests
+            ]);
         }
+            // $wallet = Wallet::where('user_id', $user->id)->first();
+            $offerIds = Offer::where('user_id', $user->id)->pluck('id');
+            // $offerIds = json_decode(json_encode($offerIds), true);
+            // if($limit > 0)
+            // {
+            //     $requests = ModelsRequest::whereIn('offer_id', $offerIds)->where('status', 3)->limit($limit)
+            //                    ->get(['id', 'offer_id', 'parecel_address', 'receiver_address', 'amount']);
+            // } else {
+                $requests = ModelsRequest::whereIn('offer_id', $offerIds)->where('status', 3)
+                ->get(['id', 'offer_id', 'parecel_address', 'receiver_address', 'amount']);
+            // }
+            
+            // $earning = WalletHistory::where('wallet_id', $wallet->id)->where('is_deposite', 1)->sum('amount');
+            // $withDraw = WalletHistory::where('wallet_id', $wallet->id)->where('is_expanse', 1)->sum('amount');
+
+            return response()->json([
+                // 'balance' => $wallet->amount,
+                // 'total_earning' => $earning,
+                // 'total_withdraw' => $withDraw,
+                'transactions' => $requests
+            ]);
     }
 }
