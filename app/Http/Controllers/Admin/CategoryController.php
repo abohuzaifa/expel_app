@@ -165,25 +165,31 @@ class CategoryController extends Controller
         if ($data['status'] == 'OK') {
             // print_r($data); exit;
             // Extract distance in meters
-            $distance = $data['rows'][0]['elements'][0]['distance']['value'];
-            // echo "<pre>";    print_r($data); exit;
-            // Convert distance to kilometers
-            $distanceInKm = $distance / 1000;
-            // echo $distanceInKm; exit;
-            // Extract duration in seconds
-            $duration = $data['rows'][0]['elements'][0]['duration']['value'];
+            if(isset($data['rows'][0]['elements'][0]['distance']) && isset($data['rows'][0]['elements'][0]['duration']))
+            {
+                $distance = $data['rows'][0]['elements'][0]['distance']['value'];
+                // echo "<pre>";    print_r($data); exit;
+                // Convert distance to kilometers
+                $distanceInKm = $distance / 1000;
+                // echo $distanceInKm; exit;
+                // Extract duration in seconds
+                $duration = $data['rows'][0]['elements'][0]['duration']['value'];
 
-            // Convert duration to minutes
-            $durationInMinutes = $duration / 60;
+                // Convert duration to minutes
+                $durationInMinutes = $duration / 60;
 
-            // Extract the estimated arrival time
-            $arrivalTime = now()->addMinutes($durationInMinutes);
+                // Extract the estimated arrival time
+                $arrivalTime = now()->addMinutes($durationInMinutes);
 
-            return response()->json([
-                'distance' => $distanceInKm, // Distance in kilometers
-                'duration' => $durationInMinutes, // Duration in minutes
-                'arrival_time' => $arrivalTime, // Estimated arrival time
-            ]);
+                return response()->json([
+                    'distance' => $distanceInKm, // Distance in kilometers
+                    'duration' => $durationInMinutes, // Duration in minutes
+                    'arrival_time' => $arrivalTime, // Estimated arrival time
+                ]);
+            } else {
+                return response()->json(['msg' => 'Invalid lat longs of the request or user']);
+            }
+            
         } else {
             // If the response status is not OK, return an error
             return response()->json(['error' => 'Unable to calculate distance and time.']);
