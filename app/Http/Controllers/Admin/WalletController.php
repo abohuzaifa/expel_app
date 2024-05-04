@@ -311,10 +311,10 @@ class WalletController extends Controller
             if($limit > 0)
             {
                 $requests = ModelsRequest::where('user_id', $user->id)->where('status', 3)->limit($limit)
-                               ->get(['id', 'offer_id', 'parecel_address', 'receiver_address', 'amount']);
+                               ->get(['id', 'offer_id', 'parcel_address', 'receiver_address', 'amount']);
             } else {
                 $requests = ModelsRequest::where('user_id', $user->id)->where('status', 3)
-                ->get(['id', 'offer_id', 'parecel_address', 'receiver_address', 'amount']);
+                ->get(['id', 'offer_id', 'parcel_address', 'receiver_address', 'amount']);
             }
             
             // $earning = WalletHistory::where('wallet_id', $wallet->id)->where('is_deposite', 1)->sum('amount');
