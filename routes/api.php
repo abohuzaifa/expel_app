@@ -60,6 +60,7 @@ Route::group(["middleware"=> "auth:sanctum"], function () {
     Route::get('/offerList', [RequestController::class, 'offerList'])->name('offerList');
     Route::post('/rooteTimeAndDuration', [RequestController::class, 'rooteTimeAndDuration'])->name('rooteTimeAndDuration');
     Route::post('/acceptOffer', [RequestController::class, 'acceptOffer'])->name('acceptOffer');
+    Route::post('/markCompleteRequest', [RequestController::class, 'markCompleteRequest'])->name('markCompleteRequest');
 
     Route::post('/addTrip', [TripController::class, 'addTrip'])->name('addTrip');
 
@@ -67,6 +68,7 @@ Route::group(["middleware"=> "auth:sanctum"], function () {
 
     
     Route::get('/dashboardRequest', [CategoryController::class, 'dashboardRequest'])->name('dashboardRequest');
+    Route::get('/currentRidesList', [CategoryController::class, 'currentRidesList'])->name('currentRidesList');
 
     // history section 
     Route::post('/createHistory', [HistoryController::class, 'createHistory'])->name('createHistory');

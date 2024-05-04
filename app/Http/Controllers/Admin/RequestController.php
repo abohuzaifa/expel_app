@@ -7,6 +7,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Offer;
 use App\Models\PaymentMethod;
 use App\Models\Request as ModelRequest;
+use App\Models\Wallet;
+use App\Models\WalletHistory;
 use GuzzleHttp\Client;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -264,6 +266,49 @@ class RequestController extends Controller
         $requests = ModelRequest::with('user')->paginate(10);
 
         return response()->json(['data' => $requests]);
+    }
+
+    public function markCompleteRequest(Request $req)
+    {
+        $req->validate([
+            'request_id' => 'required|int'
+        ]);
+
+        $update = DB::table('requests')->where('id', $req->request_id)->update([
+            'status' => 3
+        ]);
+        if($update)
+        {
+            $request = ModelRequest::find($req->request_id);
+            if($request->payment_status == 1)
+            {
+                $offer = Offer::find($request->offer_id);
+                $wallet = Wallet::where('user_id', $offer->user_id)->first();
+                $amount = $wallet->amount+$request->amount;
+                $walletUpdate = DB::table('wallets')->where('id', $wallet->id)->update([
+                    'amount' => $amount
+                ]);
+                if($walletUpdate)
+                {
+                    $wallet_history = WalletHistory::create([
+                        'wallet_id' => $wallet['wallet_id'],
+                        'amount' => $request->amount,
+                        'is_deposite' => 1,
+                        'description' => 'Payment of ride which ID is'.$req->request_id,
+                    ]);
+                    if($wallet_history)
+                    {
+                        return response()->json(['msg' => 'Request status update successfully']);
+                    }  else {
+                        return response()->json(['msg' => 'History not created of current request']);
+                    }
+                }  else {
+                    return response()->json(['msg' => 'Wallet updation faild']);
+                }
+            }
+        }  else {
+            return response()->json(['msg' => 'Request status updation faild']);
+        }
     }
 }
 

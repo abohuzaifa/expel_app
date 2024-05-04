@@ -211,7 +211,33 @@ class CategoryController extends Controller
     }
     public function currentRidesList()
     {
-        
+        $user = auth()->user();
+        if($user->user_type == 2)
+        {
+            $userId = $user->id; // Make sure $user is the authenticated user or correctly passed
+
+            $offers = Offer::with([
+                'request' => function ($query) {
+                    $query->select('id', 'user_id', 'parcel_lat', 'parcel_long', 'parcel_address', 'receiver_lat', 'receiver_long', 'receiver_address');
+                },
+                'user' => function ($query) {
+                    $query->select('id', 'name', 'email', 'mobile', 'latitude', 'longitude', 'street_address');
+                }
+            ])->where('user_id', $userId)
+            ->get();
+    
+            if(count($offers) > 0)
+            {
+                foreach($offers as $key => $offer)
+                {
+    
+                    $offers[$key]['data'] = $this->calculateDistanceAndTime($offer->request->parcel_lat,$offer->request->parcel_long, $offer->user->latitude, $offer->user->longitude);
+                }
+                return response()->json(['data' => $offers]);
+            } else {
+                return response()->json(['data' => []]);
+            }
+        }   
         $requestIds = ModelsRequest::where('user_id', auth()->user()->id)->where('status', 1)->pluck('id');
         // print_r($requestIds); exit;
         $requestIds = json_decode(json_encode($requestIds), true);

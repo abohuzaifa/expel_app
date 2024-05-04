@@ -12,6 +12,8 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\PaymentMethod;
 use App\Models\CardDetail;
+use App\Models\Offer;
+use App\Models\Request as ModelsRequest;
 use App\Models\Wallet;
 use App\Models\WalletHistory;
 
@@ -128,6 +130,10 @@ class WalletController extends Controller
     {
         $user = auth()->user();
         $wallet = Wallet::where('user_id', $user->id)->first();
+
+        if (is_null($wallet) || is_null($wallet->id)) {
+            return response()->json(['msg' => 'Wallet not found']);
+        }
         $deposits = WalletHistory::where('wallet_id', $wallet->id)
             ->where('is_deposite', 1)
             ->sum('amount');
@@ -270,5 +276,22 @@ class WalletController extends Controller
             'status' => 1,
             'history' => json_decode(json_encode($History), true)
         ]);
+    }
+
+    public function recentTransactionHistory($limit)
+    {
+        $user = auth()->user();
+        if($user->user_type == 2)
+        {
+            $offerIds = Offer::where('user_id', $user->id)->pluck('id');
+            $offerIds = json_decode(json_encode($offerIds), true);
+
+            $requests = ModelsRequest::whereIn('offer_id', $offerIds)->limit($limit)
+                           ->get(['id', 'offer_id', 'parecel_address', 'receiver_address', 'amount']);
+            
+            $totalAmount = ModelsRequest::whereIn('offer_id', $offerIds)->sum('amount');
+
+            $balance = Wallet::
+        }
     }
 }
