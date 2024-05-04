@@ -150,7 +150,7 @@ class WalletController extends Controller
                 'earnings' => $deposits,
                 'withdral' => $expenses,
                 'balance' => $wallet->amount,
-                'current_earning' => $recentEntry->amount
+                'current_earning' => $recentEntry
             ]);
     }
     public function wallet()
