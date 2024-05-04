@@ -291,7 +291,7 @@ class WalletController extends Controller
             
             $totalAmount = ModelsRequest::whereIn('offer_id', $offerIds)->sum('amount');
 
-            $balance = Wallet::
+            // $balance = Wallet::
         }
     }
 }
