@@ -270,7 +270,7 @@ class RequestController extends Controller
 
     public function markCompleteRequest(Request $req)
     {
-        print_r(auth()->user()); exit;
+        // print_r(auth()->user()); exit;
         $req->validate([
             'request_id' => 'required|int'
         ]);
@@ -278,6 +278,7 @@ class RequestController extends Controller
         $update = DB::table('requests')->where('id', $req->request_id)->update([
             'status' => 3
         ]);
+        print_r($update); exit;
         if($update)
         {
             $request = ModelRequest::find($req->request_id);
