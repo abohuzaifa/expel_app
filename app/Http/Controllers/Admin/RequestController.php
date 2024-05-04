@@ -277,7 +277,7 @@ class RequestController extends Controller
 
         $update = ModelRequest::where('id', $req->request_id)->update(['status' => 3]);
 
-        print_r($update); exit;
+        // print_r($update); exit;
         if($update)
         {
             $request = ModelRequest::find($req->request_id);
