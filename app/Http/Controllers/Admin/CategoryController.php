@@ -219,7 +219,7 @@ class CategoryController extends Controller
         {
             $offers = Offer::with([
                 'request' => function($query) use ($requestIds) {
-                    $query->select('id', 'user_id', 'parcel_lat', 'parcel_long', 'parcel_address')
+                    $query->select('id', 'user_id', 'parcel_lat', 'parcel_long', 'parcel_address',  'receiver_lat', 'receiver_long', 'receiver_address')
                         ->whereIn('id', $requestIds); // Filter the requests by specified IDs
                     // If you want to include user data related to the request, uncomment the following:
                     // ->with(['user' => function($query) {
