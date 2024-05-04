@@ -147,13 +147,13 @@ class CategoryController extends Controller
         return $imageName;
     }
 
-    public function calculateDistanceAndTime($origin, $destination) //calculateDistanceAndTime($originLat, $originLng, $destLat, $destLng)
+    public function calculateDistanceAndTime($originLat, $originLng, $destLat, $destLng)//calculateDistanceAndTime($origin, $destination) //
     {
         $client = new Client();
         $response = $client->get('https://maps.googleapis.com/maps/api/distancematrix/json', [
             'query' => [
-                'origins' => $origin,//$originLat.','.$originLng,
-                'destinations' => $destination,//$destLat.','.$destLng,
+                'origins' =>  $originLat.','.$originLng, //$origin,//,
+                'destinations' => $destLat.','.$destLng,//$destination,//,
                 'mode' => 'driving',
                 'key' => env('GOOGLE_DISTANCE_MATRIX_API_KEY'),
             ]
@@ -163,6 +163,7 @@ class CategoryController extends Controller
         // echo "<pre>";    print_r($data); exit;
         // Check if the response status is OK
         if ($data['status'] == 'OK') {
+            // print_r($data); exit;
             // Extract distance in meters
             $distance = $data['rows'][0]['elements'][0]['distance']['value'];
             // echo "<pre>";    print_r($data); exit;
@@ -235,7 +236,7 @@ class CategoryController extends Controller
                 foreach($offers as $key => $offer)
                 {
     
-                    $offers[$key]['data'] = $this->calculateDistanceAndTime($offer->request->parcel_address, $offer->user->street_address);
+                    $offers[$key]['data'] = $this->calculateDistanceAndTime($offer->request->parcel_lat,$offer->request->parcel_long, $offer->user->latitude, $offer->user->longitude);
                 }
                 return $offers;
             } else {
