@@ -275,9 +275,8 @@ class RequestController extends Controller
             'request_id' => 'required|int'
         ]);
 
-        $update = DB::table('requests')->where('id', $req->request_id)->update([
-            'status' => 3
-        ]);
+        $update = ModelRequest::where('id', $req->request_id)->update(['status' => 3]);
+
         print_r($update); exit;
         if($update)
         {
