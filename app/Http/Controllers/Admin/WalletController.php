@@ -307,7 +307,7 @@ class WalletController extends Controller
         }
             // $wallet = Wallet::where('user_id', $user->id)->first();
             $offerIds = Offer::where('user_id', $user->id)->pluck('id');
-            // $offerIds = json_decode(json_encode($offerIds), true);
+            $offerIds = json_decode(json_encode($offerIds), true);
             // if($limit > 0)
             // {
             //     $requests = ModelsRequest::whereIn('offer_id', $offerIds)->where('status', 3)->limit($limit)
