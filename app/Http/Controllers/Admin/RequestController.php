@@ -221,33 +221,103 @@ class RequestController extends Controller
             'amount' => 'required',
             'request_id' => 'required',
             'offer_id' => 'required',
-            'card' => 'required',
+            'payment_method' => 'required',
             'description' => 'required'
         ]);
 
-        $pm = PaymentMethod::where('slug', 'click_pay')->first();
+        $pm = PaymentMethod::where('id', $req->payment_method)->first();
         // print_r($pm);
-        $data['profile_key'] = $pm->public_key;
-        $data['secret_key'] = $pm->secret_key;
-
-        $payment = Offer::clickPay($data);
-        $payment = json_decode($payment, true);
-        // print_r($payment); exit;
-        if(isset($payment['invoice_id']))
+        if($pm->slug == 'click_pay')
         {
+            $data['profile_key'] = $pm->public_key;
+            $data['secret_key'] = $pm->secret_key;
+    
+            $payment = Offer::clickPay($data);
+            $payment = json_decode($payment, true);
+            // print_r($payment); exit;
+            if(isset($payment['invoice_id']))
+            {
+                $request = DB::table('requests')->where('id', $req->request_id)->update([
+                    'invoice_id' => $payment['invoice_id'],
+                    'amount' => $req->amount
+                ]);
+                if($request)
+                {
+                    return response()->json(['data' => $payment]);
+                } else {
+                    return response()->json(['msg' => "Update method fails"]);
+                }
+            } else {
+                return response()->json(['msg' => "Something Wrong in request."]);
+            }
+        } elseif($pm->slug == 'COD') {
             $request = DB::table('requests')->where('id', $req->request_id)->update([
-                'invoice_id' => $payment['invoice_id'],
+                'offer_id' => $req->offer_id,
                 'amount' => $req->amount
             ]);
             if($request)
+                {
+                    return response()->json(['data' => [
+                        'msg' => 'request accepted successfully'
+                    ]]);
+                } else {
+                    return response()->json(['msg' => "Update method fails"]);
+                }
+        } elseif($pm->slug == 'wallet')
+        {
+            $wallet = Wallet::where('user_id', auth()->user()->id)->first();
+
+            if($wallet->amount >= $req->amount )
             {
-                return response()->json(['data' => $payment]);
+                DB::beginTransaction();
+                try{
+                    $request = DB::table('requests')->where('id', $req->request_id)->update([
+                        'offer_id' => $req->offer_id,
+                        'amount' => $req->amount,
+                        'payment_status' => 1
+                    ]);
+                        if($request)
+                        {
+                            
+                            $diff = doubleval($wallet->amount - $req->amount);
+                            $wUpdate = Wallet::where('user_id', auth()->user()->id)->update([
+                                'amount' => $diff
+                            ]);
+                            if($wUpdate)
+                            {
+                                $history = WalletHistory::create([
+                                    'wallet_id' => $wallet->id,
+                                    'amount' => $req->amount,
+                                    'is_expanse' => 1,
+                                    'description' => 'Charge your wallet against your parcel request ('.$req->request_id.') with amount '.$req->amount
+                                ]);
+                                if($history)
+                                {
+                                    DB::commit();
+                                    
+                                    return response()->json(['data' => [
+                                        'msg' => 'request accepted successfully'
+                                    ]]);
+                                }
+                            } else {
+                                return response()->json(['data' => [
+                                    'msg' => 'Wallet charge request faild'
+                                ]]);
+                            }
+                        } else {
+                            return response()->json(['msg' => "Update method fails"]);
+                        }
+                        
+                }  catch (\Exception $e) {
+                    // Something went wrong, roll back the transaction
+                    DB::rollBack();
+                }
+                
             } else {
-                return response()->json(['msg' => "Update method fails"]);
+                return response()->json(['msg' => 'User have not enough amount in wallet']);
             }
-        } else {
-            return response()->json(['msg' => "Something Wrong in request."]);
         }
+        
 
 
 
