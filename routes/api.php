@@ -87,6 +87,7 @@ Route::group(["middleware"=> "auth:sanctum"], function () {
     Route::post('/cardDetailUpdate/{id}', [AuthController::class, 'cardDetailUpdate'])->name('cardDetailUpdate');
     Route::post('/deleteCardDetails/{id}', [AuthController::class, 'deleteCardDetails'])->name('deleteCardDetails');
     Route::post('/updateVehicle', [AuthController::class, 'updateVehicle'])->name('updateVehicle');
+    Route::post('/send-notification', [AuthController::class, 'sendNotification'])->name('sendNotification');
 
 
     // Categories requests

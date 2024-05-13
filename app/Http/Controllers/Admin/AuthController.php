@@ -638,4 +638,52 @@ class AuthController extends Controller
             }
     }
 
+    public function sendNotification(Request $request)
+    {
+        $deviceToken = $request->input('device_token');
+        $title = $request->input('title');
+        $body = $request->input('body');
+        $subtitle = $request->input('subtitle');
+        $serverKey = $request->input('server_key');  // Assuming server key is sent in request for simplicity
+
+        $url = 'https://fcm.googleapis.com/fcm/send';
+
+        $headers = [
+            'Authorization: key=' . $serverKey,
+            'Content-Type: application/json'
+        ];
+
+        $notification = [
+            'title' => $title,
+            'body' => $body,
+            'subtitle' => $subtitle,
+            'key' => $request->key
+        ];
+
+        $fields = [
+            'to' => $deviceToken,
+            'notification' => $notification,
+            'priority' => 'high'
+        ];
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($fields));
+
+        $result = curl_exec($ch);
+        if ($result === FALSE) {
+            die('Curl failed: ' . curl_error($ch));
+        }
+        curl_close($ch);
+
+        return response()->json([
+            'message' => 'Notification sent successfully',
+            'result' => json_decode($result, true)
+        ]);
+    }
 }
