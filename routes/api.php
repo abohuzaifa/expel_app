@@ -50,6 +50,7 @@ Route::get("/getBanners", [BannerController::class, 'getBanners'])->name('getBan
 Route::get('/getCategory/{id}', [CategoryController::class, 'getCategory'])->name('getCategory');
 Route::get('/adminChoiceCategories', [CategoryController::class,'adminChoiceCategories'])->name('adminChoiceCategories');
 Route::post('/test', [RequestController::class, 'test'])->name('test');
+Route::post('/receiverAddressUpdate', [RequestController::class, 'receiverAddressUpdate'])->name('receiverAddressUpdate');
 
 // protected routes
 Route::group(["middleware"=> "auth:sanctum"], function () {
@@ -61,6 +62,7 @@ Route::group(["middleware"=> "auth:sanctum"], function () {
     Route::post('/rooteTimeAndDuration', [RequestController::class, 'rooteTimeAndDuration'])->name('rooteTimeAndDuration');
     Route::post('/acceptOffer', [RequestController::class, 'acceptOffer'])->name('acceptOffer');
     Route::post('/markCompleteRequest', [RequestController::class, 'markCompleteRequest'])->name('markCompleteRequest');
+    Route::post('/parcelConfirmationApi', [RequestController::class, 'parcelConfirmationApi'])->name('parcelConfirmationApi');
 
     Route::post('/addTrip', [TripController::class, 'addTrip'])->name('addTrip');
 
@@ -73,6 +75,7 @@ Route::group(["middleware"=> "auth:sanctum"], function () {
     // history section 
     Route::post('/createHistory', [HistoryController::class, 'createHistory'])->name('createHistory');
     Route::post('/trackParcel', [HistoryController::class, 'trackParcel'])->name('trackParcel');
+    Route::get('/notificationList', [HistoryController::class, 'notificationList'])->name('notificationList');
 
 
     // User requests

@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\History;
+use App\Models\Notification;
 use App\Models\Request as ModelsRequest;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class HistoryController extends Controller
@@ -30,7 +32,30 @@ class HistoryController extends Controller
             'is_end' => $req->is_end,
             'user_id' => auth()->user()->id,
         ]);
-
+        $user = auth()->user();
+        $request = ModelsRequest::find($data['request_id']);
+        if($req->is_start == 1)
+        {
+            $notification = new Notification();
+            $notification->user_id = $request->user_id; // Assuming the user is authenticated
+            $notification->message = $user->name.' collected the parcel, your parcel on the way, click to track your parcel';
+            $notification->page = 'track_parcel';
+            $notification->save();
+        } else if($req->is_end == 1)
+        {
+            $notification = new Notification();
+            $notification->user_id = $request->user_id; // Assuming the user is authenticated
+            $notification->message = 'Your parcel reched you destination, click to track your parcel';
+            $notification->page = 'track_parcel';
+            $notification->save();
+        } else {
+            $notification = new Notification();
+            $notification->user_id = $request->user_id; // Assuming the user is authenticated
+            $notification->message = 'Your parcel on the way, click to track your parcel';
+            $notification->page = 'track_parcel';
+            $notification->save();
+        }
+        
         return response()->json(['msg' => 'success', 'data' => $history]);
     }
 
@@ -49,5 +74,29 @@ class HistoryController extends Controller
         }
     }
 
+    public function notificationList()
+    {
+        $user = auth()->user(); // $userId is the ID of the user you want to retrieve notifications for
+
+        if ($user) {
+            $notifications = $user->notifications()
+                ->where('created_at', '>=', Carbon::now()->subMonth()) // Notifications from one month ago until now
+                ->orderBy('created_at', 'desc')
+                ->get();
+            if(count($notifications) > 0)
+            {
+                return response()->json([
+                    'data' => $notifications
+                ]);
+            } else {
+                return response()->json([
+                    'data' => []
+                ]);
+            }
+            // $notifications now contains the notifications in descending order of creation
+        } else {
+            // User not found
+        }
+    }
     
 }

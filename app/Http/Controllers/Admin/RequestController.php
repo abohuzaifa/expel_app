@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Events\AppWebsocket;
 use App\Http\Controllers\Controller;
+use App\Models\Notification;
 use App\Models\Offer;
 use App\Models\PaymentMethod;
 use App\Models\Request as ModelRequest;
@@ -59,11 +60,11 @@ class RequestController extends Controller
         ]);
         if($request)
         {
-            $channel = 'AppChannel_'.$request->id;
-            // event(new AppWebsocket($channel, "Request Created Successfully", $user->id, 0));
-           
-                DB::table('requests')->where('id', $request->id)->update(['channel_name' => $channel]);
-                $request->channel_name = $channel;
+            $notification = new Notification();
+            $notification->user_id = auth()->user()->id; // Assuming the user is authenticated
+            $notification->message = 'Your Request created Successfully';
+            $notification->page = 'request_page';
+            $notification->save();
                 return response()->json(['msg' => 'success', 'request' => $request]);
             
             
@@ -382,6 +383,44 @@ class RequestController extends Controller
             }
         }  else {
             return response()->json(['msg' => 'Request status updation faild']);
+        }
+    }
+
+    public function parcelConfirmationApi(Request $req)
+    {
+        $req->validate([
+            'request_id' => 'required'
+        ]);
+
+        $confirm = Offer::with('request')->where('user_id', auth()->user()->id)->where('request_id', $req->request_id)->where('is_accept', 1)->first();
+        if($confirm && $confirm->id > 0)
+        {
+            return response()->json([
+                'data' => $confirm,
+                'msg' => 'Request confirm successfully'
+            ]);
+        } else {
+            return response()->json([
+                'msg' => 'Request confirmation failed'
+            ]);
+        }
+    }
+
+    public function receiverAddressUpdate(Request $req)
+    {
+        $req->validate([
+            'request_id' => 'required|int',
+            'receiver_lat' => 'required',
+            'receiver_long' => 'required',
+            'receiver_address' => 'required'
+        ]);
+
+        $update = ModelRequest::where('id', $req->request_id)->update($req);
+        if($update)
+        {
+            return response()->json(['msg' => 'Receiver address update successfully']);
+        } else {
+            return response()->json(['msg' => 'Receiver address update faild']);
         }
     }
 }

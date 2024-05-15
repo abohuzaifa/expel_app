@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use App\Models\Wallet;
 use App\Models\CardDetail;
+use App\Models\Notification;
 use App\Models\Shop;
 use App\Rules\ValidMobileNumber;
 use Illuminate\Support\Facades\DB;
@@ -57,6 +58,11 @@ class AuthController extends Controller
             Wallet::create([
                 'user_id' => $user->id
             ]);
+            $notification = new Notification();
+            $notification->user_id = $user->id; // Assuming the user is authenticated
+            $notification->message = 'Your account registered Successfully';
+            $notification->page = 'profile';
+            $notification->save();
             return response([
                 'users' => $user,
                 'token' => $user->createToken('secret')->plainTextToken,
@@ -125,6 +131,11 @@ class AuthController extends Controller
             Wallet::create([
                 'user_id' => $user->id
             ]);
+            $notification = new Notification();
+            $notification->user_id = $user->id; // Assuming the user is authenticated
+            $notification->message = 'Your account registered Successfully';
+            $notification->page = 'profile';
+            $notification->save();
             return response([
                 'users' => $user,
                 'token' => $user->createToken('secret')->plainTextToken,
@@ -397,6 +408,11 @@ class AuthController extends Controller
             $user = DB::update('UPDATE users SET password=:password WHERE id=:id', [':password' => bcrypt($attrs["password"]), ':id' => $users[0]->id]);
             if($user)
             {
+                $notification = new Notification();
+                $notification->user_id = $users[0]->id; // Assuming the user is authenticated
+                $notification->message = 'Your account registered Successfully';
+                $notification->page = 'profile';
+                $notification->save();
                 return response([
                     'message' => "Password Update Successfully.",
                 ], 200);
