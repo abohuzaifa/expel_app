@@ -196,7 +196,7 @@ class RequestController extends Controller
                 foreach($offers as $key => $offer)
                 {
     
-                    $offers[$key]['data'] = $this->calculateDistanceAndTime($offer->request->parcel_lat,$offer->request->parcel_long, $offer->user->latitude, $offer->user->longitude);
+                    // $offers[$key]['data'] = $this->calculateDistanceAndTime($offer->request->parcel_lat,$offer->request->parcel_long, $offer->user->latitude, $offer->user->longitude);
                 }
                 return response()->json([
                     'offers' => $offers
