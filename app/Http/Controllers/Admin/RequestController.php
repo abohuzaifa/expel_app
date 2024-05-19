@@ -334,7 +334,8 @@ class RequestController extends Controller
     {
         $user = auth()->user();
 
-        $requests = ModelRequest::with('user')->paginate(10);
+        $requests = ModelRequest::with('user')->where('status', 0)
+        ->where('parcel_address', 'like', '%' . $user->city . '%')->paginate(10);
 
         return response()->json(['data' => $requests]);
     }
