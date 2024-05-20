@@ -63,6 +63,7 @@ Route::group(["middleware"=> "auth:sanctum"], function () {
     Route::post('/acceptOffer', [RequestController::class, 'acceptOffer'])->name('acceptOffer');
     Route::post('/markCompleteRequest', [RequestController::class, 'markCompleteRequest'])->name('markCompleteRequest');
     Route::post('/parcelConfirmationApi', [RequestController::class, 'parcelConfirmationApi'])->name('parcelConfirmationApi');
+    Route::get('/near_by_drivers', [RequestController::class, 'near_by_drivers'])->name('near_by_drivers');
 
     Route::post('/addTrip', [TripController::class, 'addTrip'])->name('addTrip');
 

@@ -8,6 +8,7 @@ use App\Models\Notification;
 use App\Models\Offer;
 use App\Models\PaymentMethod;
 use App\Models\Request as ModelRequest;
+use App\Models\User;
 use App\Models\Wallet;
 use App\Models\WalletHistory;
 use GuzzleHttp\Client;
@@ -423,6 +424,15 @@ class RequestController extends Controller
         } else {
             return response()->json(['msg' => 'Receiver address update faild']);
         }
+    }
+    public function near_by_drivers(Request $req)
+    {
+        $user = auth()->user();
+
+        $users = User::where('user_type', 2)->where('status', 1)
+        ->where('city', 'like', '%' . $user->city . '%')->get();
+
+        return response()->json(['data' => $users]);
     }
 }
 
