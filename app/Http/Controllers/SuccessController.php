@@ -13,6 +13,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\PaymentMethod;
 use App\Models\CardDetail;
+use App\Models\Notification;
 use App\Models\Request as ModelsRequest;
 use App\Models\Wallet;
 use App\Models\WalletHistory;
@@ -42,6 +43,18 @@ class SuccessController extends Controller
                     "payment_status" => 1,
                     'offer_id' => $offer_id
                 ]);
+                $user = User::find($request->user_id);
+                $notification = new Notification();
+                $notification->user_id = $request->user_id; // Assuming the user is authenticated
+                $notification->message = 'Your Request payment done successfully';
+                $notification->page = 'request_page';
+                $notification->save();
+                $data = [];
+                $data['title'] = 'Payment';
+                $data['body'] = 'Your request payment done successfully';
+                $data['device_token'] = $user->device_token;
+                $data['is_driver'] = 0;
+                User::sendNotification($data);
             }
 
         }

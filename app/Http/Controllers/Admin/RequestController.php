@@ -66,6 +66,12 @@ class RequestController extends Controller
             $notification->message = 'Your Request created Successfully';
             $notification->page = 'request_page';
             $notification->save();
+            $data = [];
+            $data['title'] = 'New request';
+            $data['body'] = 'Your request created successfully';
+            $data['device_token'] = $user->device_token;
+            $data['is_driver'] = 0;
+            User::sendNotification($data);
                 return response()->json(['msg' => 'success', 'request' => $request]);
             
             
@@ -245,6 +251,19 @@ class RequestController extends Controller
                 ]);
                 if($request)
                 {
+                    $offer = Offer::find($req->offer_id);
+                    $driver = User::find($offer->user_id);
+                    $notification = new Notification();
+                    $notification->user_id = $offer->user_id; // Assuming the user is authenticated
+                    $notification->message = 'Your offer accepted against the request ID : '.$req->request_id;
+                    $notification->page = 'request_page';
+                    $notification->save();
+                    $data = [];
+                    $data['title'] = 'Accept Offer';
+                    $data['body'] = 'Your offer accepted against the request ID : '.$req->request_id;
+                    $data['device_token'] = $driver->device_token;
+                    $data['is_driver'] = 1;
+                    User::sendNotification($data);
                     return response()->json(['data' => $payment]);
                 } else {
                     return response()->json(['msg' => "Update method fails"]);
@@ -259,6 +278,19 @@ class RequestController extends Controller
             ]);
             if($request)
                 {
+                    $offer = Offer::find($req->offer_id);
+                    $driver = User::find($offer->user_id);
+                    $notification = new Notification();
+                    $notification->user_id = $offer->user_id; // Assuming the user is authenticated
+                    $notification->message = 'Your offer accepted against the request ID : '.$req->request_id;
+                    $notification->page = 'request_page';
+                    $notification->save();
+                    $data = [];
+                    $data['title'] = 'Accept Offer';
+                    $data['body'] = 'Your offer accepted against the request ID : '.$req->request_id;
+                    $data['device_token'] = $driver->device_token;
+                    $data['is_driver'] = 1;
+                    User::sendNotification($data);
                     return response()->json(['data' => [
                         'msg' => 'request accepted successfully'
                     ]]);
@@ -296,7 +328,19 @@ class RequestController extends Controller
                                 if($history)
                                 {
                                     DB::commit();
-                                    
+                                    $offer = Offer::find($req->offer_id);
+                                    $driver = User::find($offer->user_id);
+                                    $notification = new Notification();
+                                    $notification->user_id = $offer->user_id; // Assuming the user is authenticated
+                                    $notification->message = 'Your offer accepted against the request ID : '.$req->request_id;
+                                    $notification->page = 'request_page';
+                                    $notification->save();
+                                    $data = [];
+                                    $data['title'] = 'Accept Offer';
+                                    $data['body'] = 'Your offer accepted against the request ID : '.$req->request_id;
+                                    $data['device_token'] = $driver->device_token;
+                                    $data['is_driver'] = 1;
+                                    User::sendNotification($data);
                                     return response()->json(['data' => [
                                         'msg' => 'request accepted successfully'
                                     ]]);
