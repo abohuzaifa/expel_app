@@ -27,7 +27,8 @@ class RequestController extends Controller
             'parcel_lat' => 'required',
             'parcel_long' => 'required',
             'parcel_address' => 'required',
-            'receiver_mobile' => 'required'
+            'receiver_mobile' => 'required',
+            'category_id' => 'required|int'
         ]);
 
         $images = [];
@@ -57,7 +58,8 @@ class RequestController extends Controller
             'receiver_lat' => $req->receiver_lat,
             'receiver_long' => $req->receiver_long,
             'receiver_address' => $req->receiver_address,
-            'receiver_mobile' => $req->receiver_mobile
+            'receiver_mobile' => $req->receiver_mobile,
+            'category_id' => $req->category_id
         ]);
         if($request)
         {
