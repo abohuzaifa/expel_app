@@ -22,8 +22,8 @@ class RequestController extends Controller
     public function createRequest(Request $req)
     {
         $req->validate([
-            'from_date' => 'required',
-            'to_date' => 'required',
+            // 'from_date' => 'required',
+            // 'to_date' => 'required',
             'parcel_lat' => 'required',
             'parcel_long' => 'required',
             'parcel_address' => 'required',
@@ -50,8 +50,8 @@ class RequestController extends Controller
         $user = auth()->user();
         $request = ModelRequest::create([
             'user_id' => $user->id,
-            'from_date' => $req->from_date,
-            'to_date' => $req->to_date,
+            'from_date' => date('Y-m-d'),
+            'to_date' => $req->delivery_date,
             'images' => json_encode($images),
             'parcel_lat' => $req->parcel_lat,
             'parcel_long' => $req->parcel_long,
@@ -60,8 +60,7 @@ class RequestController extends Controller
             'receiver_long' => $req->receiver_long,
             'receiver_address' => $req->receiver_address,
             'receiver_mobile' => $req->receiver_mobile,
-            'category_id' => $req->category_id,
-            'delivery_date' => $req->delivery_date
+            'category_id' => $req->category_id
         ]);
         if($request)
         {

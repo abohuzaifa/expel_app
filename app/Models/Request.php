@@ -25,8 +25,7 @@ class Request extends Model
         "status",
         "offer_id",
         "channel_name",
-        "category_id",
-        "delivery_date"
+        "category_id"
     ];
     protected $hidden = [
     ];
