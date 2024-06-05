@@ -76,7 +76,7 @@ class RequestController extends Controller
             $data['is_driver'] = 0;
             // User::sendNotification($data);
             $parcel_city = $req->parcel_city;
-            $users = User::where('city', $parcel_city)->get();
+            $users = User::where('city', $parcel_city)->where('user_type', 2)->get();
                 return response()->json(['msg' => 'success', 'request' => $request, 'drivers' => $users]);
             
             
@@ -116,7 +116,7 @@ class RequestController extends Controller
         // $origin =  $req->origin;     //"Gaggoo, Vehari, Punjab, Pakistan"; // You can also use latitude and longitude here
         // $destination =  $req->destination;    //"Burewala, Vehari, Punjab, Pakistan"; // You can also use latitude and longitude here
 
-        return $this->calculateDistanceAndTime($originLat, $originLng, $destLat, $destLng);
+        // return $this->calculateDistanceAndTime($originLat, $originLng, $destLat, $destLng);
     }
     public function calculateDistanceAndTime($originLat, $originLng, $destLat, $destLng)//calculateDistanceAndTime($origin, $destination) //
     {
