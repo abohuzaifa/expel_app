@@ -74,8 +74,10 @@ class RequestController extends Controller
             $data['body'] = 'Your request created successfully';
             $data['device_token'] = $user->device_token;
             $data['is_driver'] = 0;
-            User::sendNotification($data);
-                return response()->json(['msg' => 'success', 'request' => $request]);
+            // User::sendNotification($data);
+            $parcel_city = $req->parcel_city;
+            $users = User::where('city', $parcel_city)->get();
+                return response()->json(['msg' => 'success', 'request' => $request, 'drivers' => $users]);
             
             
         } else {
@@ -266,7 +268,7 @@ class RequestController extends Controller
                     $data['body'] = 'Your offer accepted against the request ID : '.$req->request_id;
                     $data['device_token'] = $driver->device_token;
                     $data['is_driver'] = 1;
-                    User::sendNotification($data);
+                    // User::sendNotification($data);
                     return response()->json(['data' => $payment]);
                 } else {
                     return response()->json(['msg' => "Update method fails"]);
@@ -293,7 +295,7 @@ class RequestController extends Controller
                     $data['body'] = 'Your offer accepted against the request ID : '.$req->request_id;
                     $data['device_token'] = $driver->device_token;
                     $data['is_driver'] = 1;
-                    User::sendNotification($data);
+                    // User::sendNotification($data);
                     return response()->json(['data' => [
                         'msg' => 'request accepted successfully'
                     ]]);
@@ -343,7 +345,7 @@ class RequestController extends Controller
                                     $data['body'] = 'Your offer accepted against the request ID : '.$req->request_id;
                                     $data['device_token'] = $driver->device_token;
                                     $data['is_driver'] = 1;
-                                    User::sendNotification($data);
+                                    // User::sendNotification($data);
                                     return response()->json(['data' => [
                                         'msg' => 'request accepted successfully'
                                     ]]);
@@ -480,6 +482,19 @@ class RequestController extends Controller
         ->where('city', 'like', '%' . $user->city . '%')->get();
 
         return response()->json(['data' => $users]);
+    }
+
+    function test()
+    {
+        // Example usage
+        $registrationToken = 'e5qylVRZSpqnupgXcZDkyu:APA91bF_lTvwt-xqKQswo8nHnQGyjt1ge3zYAjdN1Ka3hCgcYi-vZo4rDLUmNeoGvv0u3jxP-OztfJyl2n7861YJvZ-fmmpkKjPKo70t2iaQRnGcQwgyfvcjwbyuhpZux9ZrAZxmfiU9';
+        $title = 'Hello';
+        $body = 'This is a test notification';
+        $credentialsPath = storage_path('app/firebase_credentials.json');
+
+        $response = User::sendNotification($registrationToken, $title, $body, $credentialsPath);
+
+        echo $response;
     }
 }
 
