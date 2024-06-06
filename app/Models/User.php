@@ -75,8 +75,56 @@ class User extends Authenticatable
 
         $url = 'https://fcm.googleapis.com/v1/projects/cargo-delivery-app-4fbb8/messages:send';
 
+        // Set your client credentials and refresh token
+        $client_id = getenv('GOOGLE_CLIENT_ID');
+        $client_secret = getenv('GOOGLE_CLIENT_SECRET');
+        $refresh_token = '1//09QBeniq_Wn0OCgYIARAAGAkSNwF-L9Ir7-N62DBDcg_MpujjLo8Rjyjf9F51gFuaHSNBZGGCSxPgyny2pvU40avg830-NnjY47I'; // Replace with your actual refresh token
+        $token_url = 'https://oauth2.googleapis.com/token';
+
+        // Prepare the POST fields
+        $post_fields = [
+            'client_id' => $client_id,
+            'client_secret' => $client_secret,
+            'refresh_token' => $refresh_token,
+            'grant_type' => 'refresh_token',
+        ];
+
+        // Initialize cURL
+        $ch = curl_init();
+
+        // Set the cURL options
+        curl_setopt($ch, CURLOPT_URL, $token_url);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($post_fields));
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Content-Type: application/x-www-form-urlencoded'
+        ]);
+
+        // Execute the cURL request and get the response
+        $response = curl_exec($ch);
+
+        // Check for cURL errors
+        if (curl_errno($ch)) {
+            die('Curl error: ' . curl_error($ch));
+        }
+
+        // Close the cURL session
+        curl_close($ch);
+
+        // Decode the JSON response
+        $response_data = json_decode($response, true);
+
+        // Check if the response contains an error
+        if (isset($response_data['error'])) {
+            die('Error refreshing the token: ' . $response_data['error']);
+        }
+
+        // print_r($response_data); exit;
+        // Extract the new access token
+        $newAccessToken = $response_data['access_token'];
         $headers = [
-            'Authorization: Bearer ya29.a0AXooCgt2FKRORoQjbJQMLIAQGKJzUrSyZw9qaJeolF-yG3s8W75jFQQZn-yEqlzmOVm5GB1zewZUBbl3Q6OCs_2pPFw10mK54_osnEoGzmLdcEYyhn4OPc5QlaXmADtuEUJaLWmQW42MMVsZmS_2WGCs2Um1Du4yPrJIaCgYKAfwSARESFQHGX2MiWzN-N6UDQvntLHUGW0LmNw0171',
+            'Authorization: Bearer '.$newAccessToken,
             'Content-Type: application/json'
         ];
 

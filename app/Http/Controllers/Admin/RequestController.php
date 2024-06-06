@@ -494,15 +494,15 @@ class RequestController extends Controller
 
     function test()
     {
-        // Example usage
-        $registrationToken = 'e5qylVRZSpqnupgXcZDkyu:APA91bF_lTvwt-xqKQswo8nHnQGyjt1ge3zYAjdN1Ka3hCgcYi-vZo4rDLUmNeoGvv0u3jxP-OztfJyl2n7861YJvZ-fmmpkKjPKo70t2iaQRnGcQwgyfvcjwbyuhpZux9ZrAZxmfiU9';
-        $title = 'Hello';
-        $body = 'This is a test notification';
-        $credentialsPath = storage_path('app/firebase_credentials.json');
+        $data = [];
+        $data['title'] = 'Parcel Collected';
+        $data['body'] = 'Your parcel on the way, click to track your parcel';
+        $data['request_id'] = '123';
+        $data['device_token'] = 'dN-4DUh1TamgfSsYKPvjM0:APA91bEOO5VxmPUDrI4kskY-LF7btvIoToiHEJ5mNYPd3SGU6ESsgcKD7oCCSXaFpeUSC27NPbZ8xSjPE6BsLScCSQjyVy6Dv0Ltp-PFDob_wGtGyt1PkVo6gnf6UsZKOAm1LAvBuwri';
 
-        $response = User::sendNotification([]);
+        $response = User::sendNotification($data);
 
-        echo $response;
+        print_r($response);
     }
 }
 
