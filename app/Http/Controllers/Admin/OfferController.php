@@ -38,11 +38,12 @@ class OfferController extends Controller
                 $data['title'] = 'New Offer';
                 $data['body'] = $driver->name.' add new offer againest your request';
                 $data['device_token'] = $user->device_token;
-                $data['is_driver'] = 0;
-                User::sendNotification($data);
+                $data['request_id'] = $req->request_id;
+                $res = User::sendNotification($data);
                 return response()->json([
                     'msg' => 'success',
-                    'offer' => $offer
+                    'offer' => $offer,
+                    'pn_status' => $res
                 ]);
         } else {
             return response()->json([

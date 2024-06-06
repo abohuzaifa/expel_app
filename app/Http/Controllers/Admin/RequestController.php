@@ -71,12 +71,20 @@ class RequestController extends Controller
             $notification->save();
             $data = [];
             $data['title'] = 'New request';
-            $data['body'] = 'Your request created successfully';
-            $data['device_token'] = $user->device_token;
-            $data['is_driver'] = 0;
+            $data['body'] = 'A new request created in this region. Click here';
+            $data['request_id'] = $request->id;
+
             // User::sendNotification($data);
             $parcel_city = $req->parcel_city;
             $users = User::where('city', $parcel_city)->where('user_type', 2)->get();
+            if(count($users) > 0)
+            {
+                foreach($users as $driver)
+                {
+                    $data['device_token'] = $driver->device_token;
+                    User::sendNotification($data);
+                }
+            }
                 return response()->json(['msg' => 'success', 'request' => $request, 'drivers' => $users]);
             
             
@@ -267,9 +275,9 @@ class RequestController extends Controller
                     $data['title'] = 'Accept Offer';
                     $data['body'] = 'Your offer accepted against the request ID : '.$req->request_id;
                     $data['device_token'] = $driver->device_token;
-                    $data['is_driver'] = 1;
-                    // User::sendNotification($data);
-                    return response()->json(['data' => $payment]);
+                    $data['request_id'] = $req->request_id;
+                    $res = User::sendNotification($data);
+                    return response()->json(['data' => $payment, 'pn_status' => $res]);
                 } else {
                     return response()->json(['msg' => "Update method fails"]);
                 }
@@ -294,10 +302,10 @@ class RequestController extends Controller
                     $data['title'] = 'Accept Offer';
                     $data['body'] = 'Your offer accepted against the request ID : '.$req->request_id;
                     $data['device_token'] = $driver->device_token;
-                    $data['is_driver'] = 1;
-                    // User::sendNotification($data);
+                    $data['request_id'] = $req->request_id;
+                    $res = User::sendNotification($data);
                     return response()->json(['data' => [
-                        'msg' => 'request accepted successfully'
+                        'msg' => 'request accepted successfully', 'pn_status' => $res
                     ]]);
                 } else {
                     return response()->json(['msg' => "Update method fails"]);
@@ -344,10 +352,10 @@ class RequestController extends Controller
                                     $data['title'] = 'Accept Offer';
                                     $data['body'] = 'Your offer accepted against the request ID : '.$req->request_id;
                                     $data['device_token'] = $driver->device_token;
-                                    $data['is_driver'] = 1;
-                                    // User::sendNotification($data);
+                                    $data['request_id'] = $req->request_id;
+                                    $res = User::sendNotification($data);
                                     return response()->json(['data' => [
-                                        'msg' => 'request accepted successfully'
+                                        'msg' => 'request accepted successfully', 'pn_status' => $res
                                     ]]);
                                 }
                             } else {
@@ -492,7 +500,7 @@ class RequestController extends Controller
         $body = 'This is a test notification';
         $credentialsPath = storage_path('app/firebase_credentials.json');
 
-        $response = User::sendNotification($registrationToken, $title, $body, $credentialsPath);
+        $response = User::sendNotification([]);
 
         echo $response;
     }

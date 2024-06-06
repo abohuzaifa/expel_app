@@ -67,32 +67,44 @@ class User extends Authenticatable
 
     public static function sendNotification($data)
     {
-        $deviceToken = $data['device_token'];
-        $title = $data['title'];
-        $body = $data['body'];
-        // $subtitle = $data['subtitle'];
-        $serverKey = $data['is_driver'] == 1 ? env('DRIVER_SERVER_KEY') : env('USER_SERVER_KEY');  // Assuming server key is sent in request for simplicity
+        // $deviceToken = $data['device_token'];
+        // $title = $data['title'];
+        // $body = $data['body'];
+        // // $subtitle = $data['subtitle'];
+        // $serverKey = $data['is_driver'] == 1 ? env('DRIVER_SERVER_KEY') : env('USER_SERVER_KEY');  // Assuming server key is sent in request for simplicity
 
-        $url = 'https://fcm.googleapis.com/fcm/send';
+        $url = 'https://fcm.googleapis.com/v1/projects/cargo-delivery-app-4fbb8/messages:send';
 
         $headers = [
-            'Authorization: key=' . $serverKey,
+            'Authorization: Bearer ya29.a0AXooCgt2FKRORoQjbJQMLIAQGKJzUrSyZw9qaJeolF-yG3s8W75jFQQZn-yEqlzmOVm5GB1zewZUBbl3Q6OCs_2pPFw10mK54_osnEoGzmLdcEYyhn4OPc5QlaXmADtuEUJaLWmQW42MMVsZmS_2WGCs2Um1Du4yPrJIaCgYKAfwSARESFQHGX2MiWzN-N6UDQvntLHUGW0LmNw0171',
             'Content-Type: application/json'
         ];
 
-        $notification = [
-            'title' => $title,
-            'body' => $body,
-            // 'subtitle' => $subtitle,
-            'key' => $serverKey
-        ];
+        // $notification = [
+        //     'title' => $title,
+        //     'body' => $body,
+        //     // 'subtitle' => $subtitle,
+        //     'key' => $serverKey
+        // ];
 
-        $fields = [
-            'to' => $deviceToken,
-            'notification' => $notification,
-            'priority' => 'high'
-        ];
-
+        // $fields = [
+        //     'to' => $deviceToken,
+        //     'notification' => $notification,
+        //     'priority' => 'high'
+        // ];
+//dN-4DUh1TamgfSsYKPvjM0:APA91bEOO5VxmPUDrI4kskY-LF7btvIoToiHEJ5mNYPd3SGU6ESsgcKD7oCCSXaFpeUSC27NPbZ8xSjPE6BsLScCSQjyVy6Dv0Ltp-PFDob_wGtGyt1PkVo6gnf6UsZKOAm1LAvBuwri
+        $fields = '{
+            "message": {
+                 "token":"'.$data['device_token'].'",
+                 "notification":{
+                     "title":"'.$data['title'].'",
+                     "body":"'.$data['body'].'"
+                 },
+                 "data": {
+                    "request_id": "'.$data['request_id'].'"
+                }
+             }
+         }';
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_POST, true);
@@ -100,7 +112,7 @@ class User extends Authenticatable
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($fields));
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $fields);
 
         $result = curl_exec($ch);
         if ($result === FALSE) {
@@ -108,9 +120,6 @@ class User extends Authenticatable
         }
         curl_close($ch);
 
-        return response()->json([
-            'message' => 'Notification sent successfully',
-            'result' => json_decode($result, true)
-        ]);
+        return json_decode($result, true);
     }
 }
