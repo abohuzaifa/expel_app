@@ -72,13 +72,23 @@ class User extends Authenticatable
         // $body = $data['body'];
         // // $subtitle = $data['subtitle'];
         // $serverKey = $data['is_driver'] == 1 ? env('DRIVER_SERVER_KEY') : env('USER_SERVER_KEY');  // Assuming server key is sent in request for simplicity
+        if(isset($data['is_driver']) && $data['is_driver'] == 1)
+        {
+            $url = 'https://fcm.googleapis.com/v1/projects/'.getenv('DRIVER_PROJECT_ID').'/messages:send';
 
-        $url = 'https://fcm.googleapis.com/v1/projects/cargo-delivery-app-4fbb8/messages:send';
+            // Set your client credentials and refresh token
+            $client_id = getenv('GOOGLE_CLIENT_ID_d');
+            $client_secret = getenv('GOOGLE_CLIENT_SECRET_d');
+            $refresh_token = getenv('DRIVER_REFRESH_TOKEN'); // Replace with your actual refresh token
+        } else {
+            $url = 'https://fcm.googleapis.com/v1/projects/'.getenv('DELIVERY_PROJECT_ID').'/messages:send';
+    
+            // Set your client credentials and refresh token
+            $client_id = getenv('GOOGLE_CLIENT_ID');
+            $client_secret = getenv('GOOGLE_CLIENT_SECRET');
+            $refresh_token = getenv('DELIVERY_REFRESH_TOKEN'); // Replace with your actual refresh token
 
-        // Set your client credentials and refresh token
-        $client_id = getenv('GOOGLE_CLIENT_ID');
-        $client_secret = getenv('GOOGLE_CLIENT_SECRET');
-        $refresh_token = '1//09QBeniq_Wn0OCgYIARAAGAkSNwF-L9Ir7-N62DBDcg_MpujjLo8Rjyjf9F51gFuaHSNBZGGCSxPgyny2pvU40avg830-NnjY47I'; // Replace with your actual refresh token
+        }
         $token_url = 'https://oauth2.googleapis.com/token';
 
         // Prepare the POST fields

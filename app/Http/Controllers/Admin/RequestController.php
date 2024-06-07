@@ -73,7 +73,7 @@ class RequestController extends Controller
             $data['title'] = 'New request';
             $data['body'] = 'A new request created in this region. Click here';
             $data['request_id'] = $request->id;
-
+            $data['is_driver'] = 1;
             // User::sendNotification($data);
             $parcel_city = $req->parcel_city;
             $users = User::where('city', $parcel_city)->where('user_type', 2)->get();
@@ -275,6 +275,7 @@ class RequestController extends Controller
                     $data['title'] = 'Accept Offer';
                     $data['body'] = 'Your offer accepted against the request ID : '.$req->request_id;
                     $data['device_token'] = $driver->device_token;
+                    $data['is_driver'] = 1;
                     $data['request_id'] = $req->request_id;
                     $res = User::sendNotification($data);
                     return response()->json(['data' => $payment, 'pn_status' => $res]);
@@ -303,6 +304,7 @@ class RequestController extends Controller
                     $data['body'] = 'Your offer accepted against the request ID : '.$req->request_id;
                     $data['device_token'] = $driver->device_token;
                     $data['request_id'] = $req->request_id;
+                    $data['is_driver'] = 1;
                     $res = User::sendNotification($data);
                     return response()->json(['data' => [
                         'msg' => 'request accepted successfully', 'pn_status' => $res
@@ -352,6 +354,7 @@ class RequestController extends Controller
                                     $data['title'] = 'Accept Offer';
                                     $data['body'] = 'Your offer accepted against the request ID : '.$req->request_id;
                                     $data['device_token'] = $driver->device_token;
+                                    $data['is_driver'] = 1;
                                     $data['request_id'] = $req->request_id;
                                     $res = User::sendNotification($data);
                                     return response()->json(['data' => [
@@ -498,8 +501,9 @@ class RequestController extends Controller
         $data['title'] = 'Parcel Collected';
         $data['body'] = 'Your parcel on the way, click to track your parcel';
         $data['request_id'] = '123';
-        $data['device_token'] = 'dN-4DUh1TamgfSsYKPvjM0:APA91bEOO5VxmPUDrI4kskY-LF7btvIoToiHEJ5mNYPd3SGU6ESsgcKD7oCCSXaFpeUSC27NPbZ8xSjPE6BsLScCSQjyVy6Dv0Ltp-PFDob_wGtGyt1PkVo6gnf6UsZKOAm1LAvBuwri';
-
+        $data['is_driver'] = 1;
+        // $data['device_token'] = 'dN-4DUh1TamgfSsYKPvjM0:APA91bEOO5VxmPUDrI4kskY-LF7btvIoToiHEJ5mNYPd3SGU6ESsgcKD7oCCSXaFpeUSC27NPbZ8xSjPE6BsLScCSQjyVy6Dv0Ltp-PFDob_wGtGyt1PkVo6gnf6UsZKOAm1LAvBuwri';
+        $data['device_token'] = 'czTaqozZTWKcS77tC-8O-A:APA91bHiPmxuW4oZT0jgPTHgmQbOCc8Is6sP-CcX48u-eNwplocWuepK6h3F1ZzpbmXrpP2mk3Y0KmE2L_W4QJpuRsNqt3OPbEwPB9y-5cdugG6jELltGUerBFylAm-UFk7lKSRdoUOx';
         $response = User::sendNotification($data);
 
         print_r($response);
