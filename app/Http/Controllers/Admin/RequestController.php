@@ -250,7 +250,7 @@ class RequestController extends Controller
             'request_id' => 'required',
             'offer_id' => 'required',
             'payment_method' => 'required',
-            // 'description' => 'required'
+            'description' => 'required'
         ]);
 
         $pm = PaymentMethod::where('id', $req->payment_method)->first();
