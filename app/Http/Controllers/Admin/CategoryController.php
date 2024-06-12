@@ -245,7 +245,7 @@ class CategoryController extends Controller
             }
         }   
         $requestIds = ModelsRequest::where('user_id', auth()->user()->id)->where('status', 1)->pluck('id');
-        // print_r($requestIds); exit;
+        print_r($requestIds); exit;
         $requestIds = json_decode(json_encode($requestIds), true);
         if(count($requestIds) > 0)
         {
