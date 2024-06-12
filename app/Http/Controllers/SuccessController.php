@@ -41,7 +41,8 @@ class SuccessController extends Controller
                 // print_r($status); exit;
                 DB::table("requests")->where("id", "=", $request->id)->update([
                     "payment_status" => 1,
-                    'offer_id' => $offer_id
+                    'offer_id' => $offer_id,
+                    'status' => 1
                 ]);
                 $user = User::find($request->user_id);
                 $notification = new Notification();

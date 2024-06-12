@@ -250,7 +250,7 @@ class RequestController extends Controller
             'request_id' => 'required',
             'offer_id' => 'required',
             'payment_method' => 'required',
-            'description' => 'required'
+            // 'description' => 'required'
         ]);
 
         $pm = PaymentMethod::where('id', $req->payment_method)->first();
@@ -295,11 +295,13 @@ class RequestController extends Controller
         } elseif($pm->slug == 'COD') {
             $request = DB::table('requests')->where('id', $req->request_id)->update([
                 'offer_id' => $req->offer_id,
-                'amount' => $req->amount
+                'amount' => $req->amount,
+                'status' => 1
             ]);
             if($request)
                 {
                     $offer = Offer::find($req->offer_id);
+                    Offer::where('id', $req->offer_id)->update(['is_accept' => 1]);
                     $driver = User::find($offer->user_id);
                     $notification = new Notification();
                     $notification->user_id = $offer->user_id; // Assuming the user is authenticated
@@ -314,7 +316,7 @@ class RequestController extends Controller
                     $data['is_driver'] = 1;
                     $res = User::sendNotification($data);
                     return response()->json(['data' => [
-                        'msg' => 'request accepted successfully', 'pn_status' => $res
+                        'msg' => 'Request accepted successfully (COD)', 'pn_status' => $res
                     ]]);
                 } else {
                     return response()->json(['msg' => "Update method fails"]);
