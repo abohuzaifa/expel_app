@@ -11,6 +11,7 @@ use App\Models\Request as ModelRequest;
 use App\Models\User;
 use App\Models\Wallet;
 use App\Models\WalletHistory;
+use Carbon\Carbon;
 use GuzzleHttp\Client;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -192,7 +193,13 @@ class RequestController extends Controller
     public function offerList()
     {
         
-        $requestIds = ModelRequest::where('user_id', auth()->user()->id)->where('status', 0)->pluck('id');
+       // Get the current date
+        $currentDate = Carbon::now()->format('Y-m-d');
+
+        $requestIds = ModelRequest::where('user_id', auth()->user()->id)
+            ->where('status', 0)
+            ->whereDate('to_date', '>=', $currentDate)
+            ->pluck('id');
         // print_r($requestIds); exit;
         $requestIds = json_decode(json_encode($requestIds), true);
         if(count($requestIds) > 0)
