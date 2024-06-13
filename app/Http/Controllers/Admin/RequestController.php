@@ -200,7 +200,7 @@ class RequestController extends Controller
             ->where('status', 0)
             ->whereDate('to_date', '>=', $currentDate)
             ->pluck('id');
-        print_r($requestIds); exit;
+        // print_r($requestIds); exit;
         $requestIds = json_decode(json_encode($requestIds), true);
         if(count($requestIds) > 0)
         {
@@ -216,7 +216,7 @@ class RequestController extends Controller
                 'user' => function($query) {
                     $query->select('id', 'name', 'email', 'mobile', 'latitude', 'longitude', 'street_address');
                 }
-            ])->get();
+            ])->whereIn('request_id', $requestIds)->get();
                 // print_r($offers); exit;
             if(count($offers) > 0)
             {
