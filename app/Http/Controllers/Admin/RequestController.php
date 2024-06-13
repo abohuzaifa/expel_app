@@ -293,7 +293,7 @@ class RequestController extends Controller
                 return response()->json(['msg' => "Something Wrong in request."]);
             }
         } elseif($pm->slug == 'COD') {
-            echo "success"; exit;
+            // echo "success"; exit;
             $request = ModelRequest::where('id', $req->request_id)->update([
                 'offer_id' => $req->offer_id,
                 'amount' => $req->amount,
