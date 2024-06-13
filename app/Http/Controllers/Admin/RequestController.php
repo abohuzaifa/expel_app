@@ -293,7 +293,7 @@ class RequestController extends Controller
                 return response()->json(['msg' => "Something Wrong in request."]);
             }
         } elseif($pm->slug == 'COD') {
-            $request = DB::table('requests')->where('id', $req->request_id)->update([
+            $request = ModelRequest::where('id', $req->request_id)->update([
                 'offer_id' => $req->offer_id,
                 'amount' => $req->amount,
                 'status' => 1
@@ -351,7 +351,7 @@ class RequestController extends Controller
                                 ]);
                                 if($history)
                                 {
-                                    DB::commit();
+                                    
                                     $offer = Offer::find($req->offer_id);
                                     $driver = User::find($offer->user_id);
                                     $notification = new Notification();
@@ -359,6 +359,7 @@ class RequestController extends Controller
                                     $notification->message = 'Your offer accepted against the request ID : '.$req->request_id;
                                     $notification->page = 'request_page';
                                     $notification->save();
+                                    DB::commit();
                                     $data = [];
                                     $data['title'] = 'Accept Offer';
                                     $data['body'] = 'Your offer accepted against the request ID : '.$req->request_id;
