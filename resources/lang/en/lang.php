@@ -2,7 +2,7 @@
 return [
     'welcome' => 'Welcome to our website!',
     // Add more English translations
-    'labeey' => 'Labeey',
+    'labeey' => 'Turd App',
     'login_to_account' => 'Login to Your Account',
     'enter_username_password' => 'Enter your username &amp; password to login',
     'username' => 'Username',

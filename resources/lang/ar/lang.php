@@ -2,7 +2,7 @@
 return [
     'welcome' => 'مرحبا بكم في موقعنا!',
     // Add more English translations
-    'labeey' => 'لبي',
+    'labeey' => 'طرد ایپ',
     'login_to_account' => 'تسجيل الدخول الى حسابك',
     'enter_username_password' => 'أدخل اسم المستخدم وكلمة المرور لتسجيل الدخول',
     'username' => 'اسم المستخدم',
