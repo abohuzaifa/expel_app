@@ -326,7 +326,8 @@ class AuthController extends Controller
       $attrs = $request->validate([
           "mobile"=> "required|string",
           "password"=> "required|min:6",
-          "device_token" => "required"
+          "device_token" => "required",
+          'user_type' => 'required|int'
       ]);
       $data = $attrs;
       unset($data['device_token']);
@@ -343,6 +344,12 @@ class AuthController extends Controller
               return response([
                   'message' => "Your account status is inactive pls contact to the support to make active your account.",
               ], 403);
+          }
+          if($user->user_type != $request->user_type)
+          {
+                return response([
+                    'message' => "user_type does not matched",
+                ]);
           }
           if(!Auth::attempt($data)) {
               return response([
