@@ -58,6 +58,7 @@ class SuccessController extends Controller
                 $data['body'] = 'Your request payment done successfully';
                 $data['device_token'] = $user->device_token;
                 $data['is_driver'] = 0;
+                $data['request_id'] = $request->id;
                 User::sendNotification($data);
             // }
 
