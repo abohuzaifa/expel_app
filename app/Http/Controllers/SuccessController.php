@@ -25,6 +25,7 @@ class SuccessController extends Controller
     {
         // echo $id; exit;
         $id = base64_decode($id);
+        $wdata['code'] = $id."|".generateRandomCode();
         $offer_id = base64_decode($offer_id);
 
         $request = ModelsRequest::find($id);
@@ -42,8 +43,10 @@ class SuccessController extends Controller
                 DB::table("requests")->where("id", "=", $request->id)->update([
                     "payment_status" => 1,
                     'offer_id' => $offer_id,
-                    'status' => 1
+                    'status' => 1,
+                    'code' => $wdata['code']
                 ]);
+                send_message($wdata, $request->receiver_mobile);
                 $user = User::find($request->user_id);
                 $notification = new Notification();
                 $notification->user_id = $request->user_id; // Assuming the user is authenticated

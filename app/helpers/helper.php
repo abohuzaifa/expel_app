@@ -58,5 +58,70 @@ function formatCreatedAt($created_at) {
         return $interval->i . trans('lang.minutes_ago');
     }
 }
+function generateRandomCode() {
+    $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    $code = '';
+    $max = strlen($characters) - 1;
+    
+    for ($i = 0; $i < 10; $i++) {
+        $code .= $characters[mt_rand(0, $max)];
+    }
+    
+    return $code;
+}
+function send_message($data, $mobile)
+{
+    $ch = curl_init();
+
+    $payload = json_encode([
+        "messaging_product" => "whatsapp",
+        "to" => $mobile,
+        "type" => "template",
+        "template" => [
+            "name" => "parcel_template_code",
+            "language" => ["code" => "en"],
+            "components" => [
+                [
+                    "type" => "body",
+                    "parameters" => [
+                        [
+                            "type" => "text",
+                            "text" => $data['code']
+                        ]
+                    ]
+                ]
+            ]
+        ]
+    ]);
+    curl_setopt($ch, CURLOPT_URL, 'https://graph.facebook.com/v19.0/321630131030075/messages');
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_POST, 1);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+
+    $headers = array();
+    $headers[] = 'Authorization: Bearer EAAGiuwE7ziwBO7GFSmiRZBl6pMCYR1PYrCQ6Q8tsl49gum8sdebZCDr3iMfHZBagFnv3uJQScWvQnkcjKLltWrast0HS3pwZCHztYvK2xLQbpgiNGZBI0JxZAcXmKQ3rZAoo216FeZCWtZCuBpniaZA8rDd0o3E93W3xEsMR3dSWOBWTAu70ZAsSLzyxj1A7Jds3PVLVZCNJ6AjcVuNuFi1y';
+    $headers[] = 'Content-Type: application/json';
+    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+
+    $result = curl_exec($ch);
+    if (curl_errno($ch)) {
+        echo 'Error:' . curl_error($ch);
+    }
+    curl_close($ch);
+    $result = json_decode($result, true);
+    return $result;
+}
+function cleanText($text) {
+    // Remove newlines and tabs
+    $text = str_replace(array("\n", "\r", "\t"), ' ', $text);
+
+    // Replace multiple spaces with a single space
+    $text = preg_replace('/ {2,}/', ' ', $text);
+
+    // Replace more than four consecutive spaces with four spaces
+    $text = preg_replace('/ {5,}/', '    ', $text);
+
+    return $text;
+}
 
 

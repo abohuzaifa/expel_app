@@ -284,6 +284,7 @@ class RequestController extends Controller
                     $data['device_token'] = $driver->device_token;
                     $data['is_driver'] = 1;
                     $data['request_id'] = $req->request_id;
+                    
                     $res = User::sendNotification($data);
                     return response()->json(['data' => $payment, 'pn_status' => $res]);
                 } else {
@@ -505,7 +506,6 @@ class RequestController extends Controller
 
         return response()->json(['data' => $users]);
     }
-
     function test()
     {
         $data = [];
