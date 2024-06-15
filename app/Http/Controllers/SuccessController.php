@@ -53,7 +53,7 @@ class SuccessController extends Controller
                 $notification->message = 'Your Request payment done successfully';
                 $notification->page = 'request_page';
                 $notification->save();
-                $data = [];
+                // $data = [];
                 $data['title'] = 'Payment';
                 $data['body'] = 'Your request payment done successfully';
                 $data['device_token'] = $user->device_token;
