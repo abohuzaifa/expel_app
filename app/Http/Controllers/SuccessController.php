@@ -36,8 +36,8 @@ class SuccessController extends Controller
             $status = Order::clickPayOrderStatus($data);
             $status = json_decode($status, true);
             $data['status'] = 0;
-            if(isset($status['invoice_status']) && $status['invoice_status'] == "paid")
-            {
+            // if(isset($status['invoice_status']) && $status['invoice_status'] == "paid")
+            // {
                 $data['status'] = 1;
                 // print_r($status); exit;
                 DB::table("requests")->where("id", "=", $request->id)->update([
@@ -59,7 +59,7 @@ class SuccessController extends Controller
                 $data['device_token'] = $user->device_token;
                 $data['is_driver'] = 0;
                 User::sendNotification($data);
-            }
+            // }
 
         }
         return view('success',$data);
