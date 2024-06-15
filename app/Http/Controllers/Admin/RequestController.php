@@ -295,13 +295,17 @@ class RequestController extends Controller
             }
         } elseif($pm->slug == 'COD') {
             // echo "success"; exit;
+            $wdata['code'] = $req->request_id."|".generateRandomCode();
             $request = ModelRequest::where('id', $req->request_id)->update([
                 'offer_id' => $req->offer_id,
                 'amount' => $req->amount,
-                'status' => 1
+                'status' => 1,
+                'code' => $wdata['code']
             ]);
             if($request)
                 {
+                    $user_req = ModelRequest::where('id', $req->request_id)->first();
+                    send_message($wdata, $user_req->receiver_mobile);
                     $offer = Offer::find($req->offer_id);
                     Offer::where('id', $req->offer_id)->update(['is_accept' => 1]);
                     $driver = User::find($offer->user_id);
@@ -316,6 +320,7 @@ class RequestController extends Controller
                     $data['device_token'] = $driver->device_token;
                     $data['request_id'] = $req->request_id;
                     $data['is_driver'] = 1;
+                    
                     $res = User::sendNotification($data);
                     return response()->json(['data' => [
                         'msg' => 'Request accepted successfully (COD)', 'pn_status' => $res
