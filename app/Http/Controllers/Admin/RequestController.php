@@ -517,9 +517,9 @@ class RequestController extends Controller
         $data['title'] = 'Parcel Collected';
         $data['body'] = 'Your parcel on the way, click to track your parcel';
         $data['request_id'] = '123';
-        $data['is_driver'] = 1;
+        // $data['is_driver'] = 1;
         // $data['device_token'] = 'dN-4DUh1TamgfSsYKPvjM0:APA91bEOO5VxmPUDrI4kskY-LF7btvIoToiHEJ5mNYPd3SGU6ESsgcKD7oCCSXaFpeUSC27NPbZ8xSjPE6BsLScCSQjyVy6Dv0Ltp-PFDob_wGtGyt1PkVo6gnf6UsZKOAm1LAvBuwri';
-        $data['device_token'] = 'czTaqozZTWKcS77tC-8O-A:APA91bHiPmxuW4oZT0jgPTHgmQbOCc8Is6sP-CcX48u-eNwplocWuepK6h3F1ZzpbmXrpP2mk3Y0KmE2L_W4QJpuRsNqt3OPbEwPB9y-5cdugG6jELltGUerBFylAm-UFk7lKSRdoUOx';
+        $data['device_token'] = 'fYLZGa1fTbW6m_ptgKhBKl:APA91bFxhZpdcCJdAaVCkMx1OXR7OaMVgt3Idw7kdFHIbVvckynsOA2R1d96h7n1uGO0E3ucJs24nXHD342GOP1Aa0CH6Ldk8MI9vYslUYTa0p40CK1O7sewOqJnqY1rO4IY7nXtp3XQ';
         $response = User::sendNotification($data);
 
         print_r($response);

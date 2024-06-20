@@ -199,5 +199,9 @@ return [
     'read_all' => 'قراءة الكل',
     'shop_edit' => 'تعديل المتجر',
     'update_payment_method' => 'تحديث طريقة الدفع',
+    'request' => 'Request',
+    'request_list' => 'Request List',
+    'request_tracking' => 'Request Tracking',
+    
 
 ];

@@ -19,6 +19,7 @@ use App\Http\Controllers\LangController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PaymentMethod;
+use App\Http\Controllers\RequestController;
 use App\Http\Controllers\WalletController;
 
 /*
@@ -54,7 +55,7 @@ Route::group(['middleware' => ['auth']], function() {
     Route::get('sellers_active/{id}', [UserController::class,'sellers_active'])->name('sellers_active');
     Route::get('sellers_inactive/{id}', [UserController::class,'sellers_inactive'])->name('sellers_inactive');
     Route::resource('category', CategoryController::class);
-    Route::resource('shop', ShopController::class);
+    Route::resource('request', RequestController::class);
     Route::resource('product', ProductController::class);
     Route::post('category/add_favourit', 'CategoryController@add_favourit');
     Route::resource('notifications', NotificationController::class);

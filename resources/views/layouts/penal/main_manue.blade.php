@@ -29,22 +29,22 @@
     </li>
     <li class="nav-item">
       <a class="nav-link collapsed" data-bs-target="#shop" data-bs-toggle="collapse" href="#">
-        <i class="bi bi-sliders"></i><span>{{trans('lang.shop')}}</span><i class="bi bi-chevron-down ms-auto"></i>
+        <i class="bi bi-sliders"></i><span>{{trans('lang.request')}}</span><i class="bi bi-chevron-down ms-auto"></i>
       </a>
       <ul id="shop" class="nav-content collapse " data-bs-parent="#sidebar-nav">
         <li>
-          <a href="{{route('shop.index')}}">
-            <i class="bi bi-circle"></i><span>{{trans('lang.shop_list')}}</span>
+          <a href="{{route('request.index')}}">
+            <i class="bi bi-circle"></i><span>{{trans('lang.request_list')}}</span>
           </a>
         </li>
         <li>
-          <a href="{{route('shop.create')}}">
-            <i class="bi bi-circle"></i><span>{{trans('lang.shop_create')}}</span>
+          <a href="{{route('request.create')}}">
+            <i class="bi bi-circle"></i><span>{{trans('lang.request_tracking')}}</span>
           </a>
         </li>
       </ul>
     </li>
-    <li class="nav-item">
+    <!-- <li class="nav-item">
       <a class="nav-link collapsed" data-bs-target="#Item" data-bs-toggle="collapse" href="#">
         <i class="bi bi-sliders"></i><span>{{trans('lang.product')}}</span><i class="bi bi-chevron-down ms-auto"></i>
       </a>
@@ -60,7 +60,7 @@
           </a>
         </li>
       </ul>
-    </li>
+    </li> -->
     <li class="nav-item">
       <a class="nav-link collapsed" data-bs-target="#sellers" data-bs-toggle="collapse" href="#">
         <i class="bi bi-sliders"></i><span>{{trans('lang.users')}}</span><i class="bi bi-chevron-down ms-auto"></i>
@@ -98,11 +98,11 @@
             <i class="bi bi-circle"></i><span>{{trans('lang.banner_list')}}</span>
           </a>
         </li>
-        <li>
+        <!-- <li>
           <a href="{{route('orders.index')}}">
             <i class="bi bi-circle"></i><span>{{trans('lang.order_list')}}</span>
           </a>
-        </li>
+        </li> -->
         <li>
           <a href="{{route('payment_method.index')}}">
             <i class="bi bi-circle"></i><span>{{trans('lang.payment_method')}}</span>

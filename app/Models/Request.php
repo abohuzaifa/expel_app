@@ -42,4 +42,8 @@ class Request extends Model
     public function histories() {
         return $this->hasMany(History::class, 'request_id');
     }
+    // Define the relationship with the Offer model
+    public function offer() {
+        return $this->belongsTo(Offer::class);
+    }
 }

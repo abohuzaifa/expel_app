@@ -108,4 +108,8 @@ class Offer extends Model
         curl_close($curl);
         return $response;
     }
+    // Define the inverse relationship with the Request model
+    public function requests() {
+        return $this->hasMany(Request::class);
+    }
 }
