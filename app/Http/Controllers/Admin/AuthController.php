@@ -234,15 +234,7 @@ class AuthController extends Controller
 
         $update = DB::table("users")->where("id","=", $user->id)->update($data);
         // print_r($user); exit;
-        if($user->user_type == 1)
-        {
-            // echo "success"; exit;
-            DB::table('shops')->where('created_by', $user->id)->update([
-                    "location"=> $req->street_address ?? $user->street_address,
-                    'latitude' => $req->latitude ?? $user->latitude,
-                    'longitude' => $req->longitude ?? $user->longitude,
-            ]);
-        }
+       
         // if($update){
             return response([
                 "status" => 1,
