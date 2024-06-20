@@ -232,20 +232,20 @@ class AuthController extends Controller
             "longitude" => $req->longitude ?? $user->longitude,
         ];      
 
-        $update = DB::table("users")->where("id","=", $user->id)->update($data);
+        $update = User::where('id', $user->id)->update($data);
         // print_r($user); exit;
        
-        // if($update){
+        if($update){
             return response([
                 "status" => 1,
                 "msg" => "success"
             ]);
-        // } else {
-            // return response([
-            //     "status" => 0,
-            //     "msg" => "Something went wrong"
-            // ]);
-        // }
+        } else {
+            return response([
+                "status" => 0,
+                "msg" => "Something went wrong"
+            ]);
+        }
     }
     public function updateUser(Request $request)
     {
