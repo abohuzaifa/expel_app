@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Events\AppWebsocket;
 use App\Http\Controllers\Controller;
+use App\Models\History;
 use App\Models\Notification;
 use App\Models\Offer;
 use App\Models\PaymentMethod;
@@ -512,6 +513,19 @@ class RequestController extends Controller
         ->where('city', 'like', '%' . $user->city . '%')->get();
 
         return response()->json(['data' => $users]);
+    }
+    public function tracking(Request $req)
+    {
+        $req->validate([
+            'request_id' => 'required|int'
+        ]);
+
+        $request = ModelRequest::find($req->request_id);
+        $latestHistory = History::where('request_id', $req->request_id)->latest()->first();
+        $data = [];
+        $request->driver_current_record = $latestHistory;
+
+        return response()->json(['data' => $request]);
     }
     function test()
     {
