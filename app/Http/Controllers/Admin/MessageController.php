@@ -40,7 +40,7 @@ class MessageController extends Controller
             $data['title'] = 'New Message';
             $data['body'] = $request->text;
             $data['request_id'] = $request->request_id;
-            if($request->is_driver == 1)
+            if($request->is_user == 1)
             {
                 $data['is_driver'] = 1;
                 $req = ModelsRequest::where('id', $request->request_id)->first();
