@@ -64,7 +64,17 @@ class MessageController extends Controller
         $req->validate([
             'request_id' => 'required|int'
         ]);
-
+        $user = auth()->user();
+        if($user->user_type == 1)
+        {
+            Message::where('is_driver', 1)->where('request_id', $req->request_id)->update([
+                'is_read' => 1
+            ]);
+        } else {
+            Message::where('is_user', 1)->where('request_id', $req->request_id)->update([
+                'is_read' => 1
+            ]);
+        }
         $chat = Message::where('request_id', $req->request_id)->get();
         return response()->json($chat);
     }
