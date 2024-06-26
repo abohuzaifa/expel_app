@@ -425,10 +425,10 @@ class RequestController extends Controller
     {
         // print_r(auth()->user()); exit;
         $req->validate([
-            'request_id' => 'required|int'
+            'code' => 'required'
         ]);
 
-        $update = ModelRequest::where('id', $req->request_id)->update(['status' => 3]);
+        $update = ModelRequest::where('code', $req->code)->update(['status' => 3]);
 
         // print_r($update); exit;
         if($update)
@@ -436,7 +436,7 @@ class RequestController extends Controller
             $request = ModelRequest::find($req->request_id);
             if($request->payment_status == 1)
             {
-                $offer = Offer::find($request->offer_id);
+                $offer = Offer::where('is_accept', 1)->find($request->offer_id);
                 if (is_null($offer) || is_null($offer->id)) {
                     return response()->json(['msg' => 'Offer not found']);
                 }
@@ -464,14 +464,14 @@ class RequestController extends Controller
                 }
             }
         }  else {
-            return response()->json(['msg' => 'Request status updation faild']);
+            return response()->json(['msg' => 'Code does not match']);
         }
     }
 
     public function parcelConfirmationApi(Request $req)
     {
         $req->validate([
-            'request_id' => 'required'
+            'code' => 'code'
         ]);
 
         $confirm = Offer::with('request')->where('user_id', auth()->user()->id)->where('request_id', $req->request_id)->where('is_accept', 1)->first();
@@ -527,6 +527,7 @@ class RequestController extends Controller
 
         return response()->json(['data' => $request]);
     }
+
     function test()
     {
         $data = [];

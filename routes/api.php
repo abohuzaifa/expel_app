@@ -166,4 +166,6 @@ Route::group(["middleware"=> "auth:sanctum"], function () {
     Route::get("/getWalletSummary", [WalletController::class, 'getWalletSummary'])->name('getWalletSummary');
     Route::get("/recentTransactionHistory/{flag}", [WalletController::class, 'recentTransactionHistory'])->name('recentTransactionHistory');
 
+    Route::apiResource('message', MessageController::class);
+
 });

@@ -11,14 +11,13 @@ class Message extends Model
     use HasFactory, HasApiTokens;
 
     protected $fillable = [
-        "shop_id",
-        "user_id",
         "text",
+        "user_id",
+        "request_id",
         "is_user",
-        "is_shop",
+        "is_driver",
         "is_read",
-        "chat_id",
-        "images"
+        "docs"
     ];
 
     /**
