@@ -167,5 +167,7 @@ Route::group(["middleware"=> "auth:sanctum"], function () {
     Route::get("/recentTransactionHistory/{flag}", [WalletController::class, 'recentTransactionHistory'])->name('recentTransactionHistory');
 
     Route::apiResource('message', MessageController::class);
+    Route::post("/getChat", [MessageController::class, 'getChat'])->name('getChat');
+    Route::post("/markChatRead", [MessageController::class, 'markChatRead'])->name('markChatRead');
 
 });

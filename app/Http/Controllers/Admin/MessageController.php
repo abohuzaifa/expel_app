@@ -59,7 +59,35 @@ class MessageController extends Controller
             return response()->json($message, 200);
         }
     }
+    public function getChat(Request $req)
+    {
+        $req->validate([
+            'request_id' => 'required|int'
+        ]);
 
+        $chat = Message::where('request_id', $req->request_id)->get();
+        return response()->json($chat);
+    }
+    public function markChatRead(Request $req)
+    {
+        $req->validate([
+            'request_id' => 'required|int'
+        ]);
+
+        $user = auth()->user();
+        if($user->user_type == 1)
+        {
+            Message::where('is_driver', 1)->where('request_id', $req->request_id)->update([
+                'is_read' => 1
+            ]);
+        } else {
+            Message::where('is_user', 1)->where('request_id', $req->request_id)->update([
+                'is_read' => 1
+            ]);
+        }
+
+        return response()->json('Messages read successfully');
+    }
     public function show(Message $subCategory)
     {
         return $subCategory;
