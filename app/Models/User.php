@@ -124,7 +124,7 @@ class User extends Authenticatable
 
         // Decode the JSON response
         $response_data = json_decode($response, true);
-
+        print_r($response_data); exit;
         // Check if the response contains an error
         if (isset($response_data['error'])) {
             die('Error refreshing the token: ' . $response_data['error']);
