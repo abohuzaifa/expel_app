@@ -89,6 +89,7 @@ class User extends Authenticatable
             $refresh_token = getenv('DELIVERY_REFRESH_TOKEN'); // Replace with your actual refresh token
 
         }
+        echo $url; exit;
         $token_url = 'https://oauth2.googleapis.com/token';
 
         // Prepare the POST fields
