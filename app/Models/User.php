@@ -124,7 +124,7 @@ class User extends Authenticatable
 
         // Decode the JSON response
         $response_data = json_decode($response, true);
-        print_r($response_data); exit;
+        // print_r($response_data); exit;
         // Check if the response contains an error
         if (isset($response_data['error'])) {
             die('Error refreshing the token: ' . $response_data['error']);
@@ -171,7 +171,8 @@ class User extends Authenticatable
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $fields);
-
+    
+        print_r($ch); exit;
         $result = curl_exec($ch);
         if ($result === FALSE) {
             die('Curl failed: ' . curl_error($ch));
