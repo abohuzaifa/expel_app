@@ -56,7 +56,7 @@ class MessageController extends Controller
             }
             
             User::sendNotification($data);
-            return response()->json($message, 200);
+            return response()->json(['msg' => $message, 'fcm' => User::sendNotification($data)], 200);
         }
     }
     public function getChat(Request $req)
