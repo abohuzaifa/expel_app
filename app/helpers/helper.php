@@ -124,4 +124,20 @@ function cleanText($text) {
     return $text;
 }
 
+function subtractFivePercent($amount) {
+    // Calculate 5% of the amount
+    $percentage = $amount * 0.05;
+
+    // Subtract 5% from the original amount
+    $remainingAmount = $amount - $percentage;
+
+    return $remainingAmount;
+}
+
+function getFivePercent($amount) {
+    // Calculate 5% of the amount
+    $percentage = $amount * 0.05;
+
+    return $percentage;
+}
 
