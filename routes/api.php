@@ -51,6 +51,7 @@ Route::get('/getCategory/{id}', [CategoryController::class, 'getCategory'])->nam
 Route::get('/adminChoiceCategories', [CategoryController::class,'adminChoiceCategories'])->name('adminChoiceCategories');
 Route::post('/test', [RequestController::class, 'test'])->name('test');
 Route::post('/receiverAddressUpdate', [RequestController::class, 'receiverAddressUpdate'])->name('receiverAddressUpdate');
+Route::post('/paymentStatus', [RequestController::class, 'paymentStatus'])->name('paymentStatus');
 
 // protected routes
 Route::group(["middleware"=> "auth:sanctum"], function () {

@@ -552,8 +552,8 @@ class RequestController extends Controller
         $req->validate([
             'request_id' => 'required|int'
         ]);
-
-        $update = ModelRequest::where('code', $req->request_id)->update(['payment_status' => 1]);
+        
+        $update = ModelRequest::where('id', $req->request_id)->update(['payment_status' => 1]);
         
         if($update)
         {
