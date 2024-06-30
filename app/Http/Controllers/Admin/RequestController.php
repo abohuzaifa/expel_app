@@ -303,7 +303,8 @@ class RequestController extends Controller
                 'offer_id' => $req->offer_id,
                 'amount' => $req->amount,
                 'status' => 1,
-                'code' => $wdata['code']
+                'code' => $wdata['code'],
+                "payment_method" => $req->payment_method
             ]);
             if($request)
                 {
@@ -468,6 +469,8 @@ class RequestController extends Controller
                 }  else {
                     return response()->json(['msg' => 'Wallet updation faild']);
                 }
+            } else {
+                return response()->json(['msg' => 'Did you received payment, If received then press YES Or NOT']);
             }
         }  else {
             return response()->json(['msg' => 'Code does not match']);
