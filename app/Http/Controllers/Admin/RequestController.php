@@ -462,7 +462,16 @@ class RequestController extends Controller
                     ]);
                     if($wallet_history)
                     {
-                        return response()->json(['msg' => 'Request status update successfully']);
+                        $user = User::find($request->user_id);
+                        $data = [];
+                        $data['title'] = 'Request Completed';
+                        $data['body'] = 'Your parcel delivered Successfully with the request ID : '.$request->_id;
+                        $data['device_token'] = $user->device_token;
+                        $data['request_id'] = $request->id;
+                        $data['is_driver'] = 0;
+                        
+                        $res = User::sendNotification($data);
+                        return response()->json(['msg' => 'Request status update successfully', 'fcm' => $res]);
                     }  else {
                         return response()->json(['msg' => 'History not created of current request']);
                     }
