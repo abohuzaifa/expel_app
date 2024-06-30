@@ -427,15 +427,16 @@ class RequestController extends Controller
         $req->validate([
             'code' => 'required'
         ]);
-
-        $update = ModelRequest::where('code', $req->code)->update(['status' => 3]);
+        $request = ModelRequest::find($req->code);
+        
 
         // print_r($update); exit;
-        if($update)
+        if($request)
         {
-            $request = ModelRequest::find($req->request_id);
-            if($request->payment_status == 1)
+            
+            if(isset($request->payment_status) && $request->payment_status == 1)
             {
+                $update = ModelRequest::where('code', $req->code)->update(['status' => 3]);
                 $offer = Offer::where('is_accept', 1)->find($request->offer_id);
                 if (is_null($offer) || is_null($offer->id)) {
                     return response()->json(['msg' => 'Offer not found']);
