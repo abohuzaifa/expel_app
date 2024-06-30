@@ -442,10 +442,15 @@ class RequestController extends Controller
                     return response()->json(['msg' => 'Offer not found']);
                 }
                 $wallet = Wallet::where('user_id', $offer->user_id)->first();
-                $amount = $wallet->amount+$request->amount;
-                $walletUpdate = DB::table('wallets')->where('id', $wallet->id)->update([
-                    'amount' => $amount
-                ]);
+                if(isset($wallet->id) && $wallet->id > 0)
+                {
+                    $amount = $wallet->amount+$request->amount;
+                    $walletUpdate = DB::table('wallets')->where('id', $wallet->id)->update([
+                        'amount' => $amount
+                    ]);
+                } else {
+                    return response()->json(['msg' => 'Driver wallet not found']);
+                }
                 if($walletUpdate)
                 {
                     $wallet_history = WalletHistory::create([
