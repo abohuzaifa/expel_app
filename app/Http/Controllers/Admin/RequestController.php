@@ -427,7 +427,7 @@ class RequestController extends Controller
         $req->validate([
             'code' => 'required'
         ]);
-        $request = ModelRequest::find($req->code);
+        $request = ModelRequest::where('code',$req->code)->first();
         
 
         // print_r($update); exit;
