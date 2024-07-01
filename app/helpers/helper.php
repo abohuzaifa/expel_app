@@ -93,13 +93,13 @@ function send_message($data, $mobile)
             ]
         ]
     ]);
-    curl_setopt($ch, CURLOPT_URL, 'https://graph.facebook.com/v16.0/116750164666647/messages');
+    curl_setopt($ch, CURLOPT_URL, 'https://graph.facebook.com/v19.0/321630131030075/messages');
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     curl_setopt($ch, CURLOPT_POST, 1);
     curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
 
     $headers = array();
-    $headers[] = 'Authorization: Bearer EAAHpsDJRFp0BO6Hc6lF2EiJXMksdw7zxGISRjRI6GkuqjZBNcQxJUMZC3CM5whSL5na98rJQh6w6zY4gRYwZBhHxZAourHi46SfmZAswoKprYzjA0gs7FQ12DDk01UZAt45EOh7l5Sdew3qmWnMXi1SklakaCrL3mlVT19AWTjfLY0O3HLgfUwh8zipP1WAGSeA2A0tDU2psU9OrFhMxpkj1fRtwYqDRvg8DLvrSH6R8oP';
+    $headers[] = 'Authorization: Bearer EAAGiuwE7ziwBO7GFSmiRZBl6pMCYR1PYrCQ6Q8tsl49gum8sdebZCDr3iMfHZBagFnv3uJQScWvQnkcjKLltWrast0HS3pwZCHztYvK2xLQbpgiNGZBI0JxZAcXmKQ3rZAoo216FeZCWtZCuBpniaZA8rDd0o3E93W3xEsMR3dSWOBWTAu70ZAsSLzyxj1A7Jds3PVLVZCNJ6AjcVuNuFi1y';
     $headers[] = 'Content-Type: application/json';
     curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 
@@ -137,6 +137,7 @@ function subtractFivePercent($amount) {
 function getFivePercent($amount) {
     // Calculate 5% of the amount
     $percentage = $amount * 0.05;
+
 
     return $percentage;
 }
