@@ -309,7 +309,7 @@ class RequestController extends Controller
             if($request)
                 {
                     $user_req = ModelRequest::where('id', $req->request_id)->first();
-                    send_message($wdata, $user_req->receiver_mobile);
+                    $whatsapp = send_message($wdata, $user_req->receiver_mobile);
                     $offer = Offer::find($req->offer_id);
                     Offer::where('id', $req->offer_id)->update(['is_accept' => 1]);
                     $driver = User::find($offer->user_id);
@@ -327,7 +327,7 @@ class RequestController extends Controller
                     
                     $res = User::sendNotification($data);
                     return response()->json(['data' => [
-                        'msg' => 'Request accepted successfully (COD)', 'pn_status' => $res
+                        'msg' => 'Request accepted successfully (COD)', 'pn_status' => $res, 'whatsapp' => $whatsapp
                     ]]);
                 } else {
                     return response()->json(['msg' => "Update method fails"]);
