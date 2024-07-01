@@ -93,7 +93,7 @@ function send_message($data, $mobile)
             ]
         ]
     ]);
-    curl_setopt($ch, CURLOPT_URL, 'https://graph.facebook.com/v19.0/116750164666647/messages');
+    curl_setopt($ch, CURLOPT_URL, 'https://graph.facebook.com/v16.0/116750164666647/messages');
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     curl_setopt($ch, CURLOPT_POST, 1);
     curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
