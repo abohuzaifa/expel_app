@@ -52,4 +52,17 @@ class OfferController extends Controller
         }
         
     }
+
+    public function declineOffer(Request $req)
+    {
+        $req->validate([
+            'offer_id' => 'required|int'
+        ]);
+
+        $offer = Offer::where('id', $req->offer_id)->update([
+            'is_reject' => 1
+        ]);
+
+        return response()->json(['msg' => 'Offer cancelled successfully']);
+    }
 } 

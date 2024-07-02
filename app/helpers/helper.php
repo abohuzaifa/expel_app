@@ -75,6 +75,7 @@ function send_message($data, $mobile)
 
     $payload = json_encode([
         "messaging_product" => "whatsapp",
+        "recipient_type" => "individual",
         "to" => $mobile,
         "type" => "template",
         "template" => [

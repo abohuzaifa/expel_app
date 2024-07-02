@@ -70,6 +70,7 @@ Route::group(["middleware"=> "auth:sanctum"], function () {
     Route::post('/addTrip', [TripController::class, 'addTrip'])->name('addTrip');
 
     Route::post('/addOffer', [OfferController::class, 'addOffer'])->name('addOffer');
+    Route::post('/declineOffer', [OfferController::class, 'declineOffer'])->name('declineOffer');
 
     
     Route::get('/dashboardRequest', [CategoryController::class, 'dashboardRequest'])->name('dashboardRequest');

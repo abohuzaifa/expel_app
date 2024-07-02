@@ -14,6 +14,7 @@ class Offer extends Model
         'request_id',
         'amount',
         'user_id',
+        'is_reject'
     ];
 
     /**
