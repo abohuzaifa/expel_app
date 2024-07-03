@@ -210,7 +210,7 @@ class RequestController extends Controller
             $offers = Offer::with([
                 'request' => function($query) use ($requestIds) {
                     $query->select('id', 'user_id', 'parcel_lat', 'parcel_long', 'parcel_address', 'receiver_lat', 'receiver_long', 'receiver_address', 'from_date', 'to_date')
-                        ->whereIn('id', $requestIds)->where('is_reject', 0); // Filter the requests by specified IDs
+                        ->whereIn('id', $requestIds); // Filter the requests by specified IDs
                     // If you want to include user data related to the request, uncomment the following:
                     // ->with(['user' => function($query) {
                     //     $query->select('id', 'name', 'email', 'mobile');  // Specify columns for the user related to the request
@@ -219,7 +219,7 @@ class RequestController extends Controller
                 'user' => function($query) {
                     $query->select('id', 'name', 'email', 'mobile', 'latitude', 'longitude', 'street_address');
                 }
-            ])->whereIn('request_id', $requestIds)->get();
+            ])->whereIn('request_id', $requestIds)->where('is_reject', 0)->get();
                 // print_r($offers); exit;
             if(count($offers) > 0)
             {
