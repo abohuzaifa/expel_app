@@ -289,7 +289,7 @@ class RequestController extends Controller
                     $data['request_id'] = $req->request_id;
                     
                     $res = User::sendNotification($data);
-                    User::where('id', $driver->id)->update(['is_available' => 0]);
+                    // User::where('id', $driver->id)->update(['is_available' => 0]);
                     return response()->json(['data' => $payment, 'pn_status' => $res]);
                 } else {
                     return response()->json(['msg' => "Update method fails"]);
@@ -328,7 +328,7 @@ class RequestController extends Controller
                     
                     $res = User::sendNotification($data);
 
-                    User::where('id', $driver->id)->update(['is_available' => 0]);
+                    // User::where('id', $driver->id)->update(['is_available' => 0]);
                     return response()->json(['data' => [
                         'msg' => 'Request accepted successfully (COD)', 'pn_status' => $res, 'whatsapp' => $whatsapp
                     ]]);
