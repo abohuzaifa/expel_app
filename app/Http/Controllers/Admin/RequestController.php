@@ -78,7 +78,7 @@ class RequestController extends Controller
             $data['is_driver'] = 1;
             // User::sendNotification($data);
             $parcel_city = $req->parcel_city;
-            $users = User::where('user_type', 2)
+            $users = User::where('user_type', 2)->where('is_available', 1)
                     ->whereRaw('? LIKE CONCAT("%", city, "%")', [$parcel_city])
                     ->get();
             if(count($users) > 0)
@@ -289,6 +289,7 @@ class RequestController extends Controller
                     $data['request_id'] = $req->request_id;
                     
                     $res = User::sendNotification($data);
+                    User::where('id', $driver->id)->update(['is_available' => 0]);
                     return response()->json(['data' => $payment, 'pn_status' => $res]);
                 } else {
                     return response()->json(['msg' => "Update method fails"]);
@@ -326,6 +327,8 @@ class RequestController extends Controller
                     $data['is_driver'] = 1;
                     
                     $res = User::sendNotification($data);
+
+                    User::where('id', $driver->id)->update(['is_available' => 0]);
                     return response()->json(['data' => [
                         'msg' => 'Request accepted successfully (COD)', 'pn_status' => $res, 'whatsapp' => $whatsapp
                     ]]);
@@ -378,6 +381,7 @@ class RequestController extends Controller
                                     $data['is_driver'] = 1;
                                     $data['request_id'] = $req->request_id;
                                     $res = User::sendNotification($data);
+                                    User::where('id', $driver->id)->update(['is_available' => 0]);
                                     return response()->json(['data' => [
                                         'msg' => 'request accepted successfully', 'pn_status' => $res
                                     ]]);
@@ -473,6 +477,7 @@ class RequestController extends Controller
                             $data['is_driver'] = 0;
                             
                             $res = User::sendNotification($data);
+                            User::where('id', $user->id)->update(['is_available' => 1]);
                             return response()->json(['msg' => 'Request status update successfully', 'fcm' => $res]);
                         }  else {
                             return response()->json(['msg' => 'History not created of current request']);
@@ -529,6 +534,7 @@ class RequestController extends Controller
                             $data['is_driver'] = 0;
                             
                             $res[] = User::sendNotification($data);
+                            User::where('id', $user->id)->update(['is_available' => 1]);
                             return response()->json(['msg' => 'Request status update successfully', 'fcm' => $res]);
                         }  else {
                             return response()->json(['msg' => 'History not created of current request']);

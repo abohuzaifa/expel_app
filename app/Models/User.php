@@ -33,7 +33,8 @@ class User extends Authenticatable
         'driving_license',
         'bank_id',
         'bank_account',
-        'device_token'
+        'device_token',
+        'is_available'
     ];
 
     /**
