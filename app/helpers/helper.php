@@ -94,13 +94,13 @@ function send_message($data, $mobile)
             ]
         ]
     ]);
-    curl_setopt($ch, CURLOPT_URL, 'https://graph.facebook.com/v19.0/116750164666647/messages');
+    curl_setopt($ch, CURLOPT_URL, 'https://graph.facebook.com/v16.0/116750164666647/messages');
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     curl_setopt($ch, CURLOPT_POST, 1);
     curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
 
     $headers = array();
-    $headers[] = 'Authorization: Bearer EAAHpsDJRFp0BAGVDduoEG5cZB2FdO9p3tMi5LbsD0Vp1PkZB92nx6ykB8kHEEdgiP2fTx94dcsjqZCBgq3u5uifW8HAyKWLGX20TViWjtR15kvWPgTqOeCgFner1GdP18uEYyulByEMjztyZB7573cKxmvqGFKT23C4KWsK5maQ3bbu3nobpOdgVQVTQTjMveQ55WM4VsgZDZD';
+    $headers[] = 'Authorization: Bearer EAAHpsDJRFp0BO1dDZC5XHFDp53Kds46v0hSXZCvoOvUndVL3eeeDkjRnXGMvR3zsQMcgcXHrZCrAKkU6GCMxM4VPsgcfZCklBnFyDst6ZCZARZCe6kZCbib5uxRjuaC8WRK2LXnp8xB0Enz0mkFm0lVwQfThUhtrg1macvVgUvtv8ehQBENfJK6S9DPHICcODJZBEmohegVSQDjBZAPxKcU3etAk5yDIK92cbIsmOPx2nuQTMZD';
     $headers[] = 'Content-Type: application/json';
     curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 
