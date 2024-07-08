@@ -426,6 +426,70 @@ class RequestController extends Controller
         return response()->json(['data' => $requests]);
     }
 
+    public function carryRequestAfterPaymentChangeStatus($request_id)
+    {
+        $request = ModelRequest::where('id',$request_id)->first();
+        if($request)
+        {
+            if(isset($request->payment_status) && $request->payment_status == 1)
+                {
+                    $update = ModelRequest::where('id', $request_id)->update(['status' => 3]);
+                    $offer = Offer::where('is_accept', 1)->find($request->offer_id);
+                    if (is_null($offer) || is_null($offer->id)) {
+                        return response()->json(['msg' => 'Offer not found']);
+                    }
+                    $wallet = Wallet::where('user_id', $offer->user_id)->first();
+                    if(isset($wallet->id) && $wallet->id > 0)
+                    {
+                        $amount = $wallet->amount  - getFivePercent($request->amount) ;
+                        $walletUpdate = DB::table('wallets')->where('id', $wallet->id)->update([
+                            'amount' => $amount
+                        ]);
+                    } else {
+                        return response()->json(['msg' => 'Driver wallet not found']);
+                    }
+                    if($walletUpdate)
+                    {
+                        $wallet_history = WalletHistory::create([
+                            'wallet_id' => $wallet->id,
+                            'amount' => getFivePercent($request->amount),
+                            'is_expanse' => 1,
+                            'description' => 'Payment of ride which ID is'.$request_id,
+                        ]);
+                            $user = auth()->user();
+                            $data = [];
+                            $data['title'] = 'Wallet Charge';
+                            $data['body'] = 'Your Wallet charged with amount '.getFivePercent($request->amount).' againest request ID : '.$request->id;
+                            $data['device_token'] = $user->device_token;
+                            $data['request_id'] = $request->id;
+                            $data['is_driver'] = 1;
+                            
+                            $res[] = User::sendNotification($data);
+                        if($wallet_history)
+                        {
+                            $user = User::find($request->user_id);
+                            $data = [];
+                            $data['title'] = 'Request Completed';
+                            $data['body'] = 'Your parcel delivered Successfully with the request ID : '.$request->id;
+                            $data['device_token'] = $user->device_token;
+                            $data['request_id'] = $request->id;
+                            $data['is_driver'] = 0;
+                            
+                            $res[] = User::sendNotification($data);
+                            User::where('id', $user->id)->update(['is_available' => 1]);
+                            return response()->json(['msg' => 'Request status update successfully', 'fcm' => $res]);
+                        }  else {
+                            return response()->json(['msg' => 'History not created of current request']);
+                        }
+                    }
+                }
+                else {
+                    return response()->json(['msg' => 'Did you received payment, If received then press YES Or NOT', 'request_id' => $request->id]);
+                }
+        } else {
+
+        }
+    }
     public function markCompleteRequest(Request $req)
     {
         // print_r(auth()->user()); exit;
@@ -563,7 +627,7 @@ class RequestController extends Controller
         
         if($update)
         {
-            return response()->json(['msg' => 'Payent status update succesfully']);
+            $this->carryRequestAfterPaymentChangeStatus($req->request_id);
         } else {
             return response()->json(['msg' => 'Payent status updation failed']);
         }
