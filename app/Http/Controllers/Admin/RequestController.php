@@ -466,7 +466,7 @@ class RequestController extends Controller
                             $data['is_driver'] = 1;
                             
                             $res[] = User::sendNotification($data);
-                            print_r($res); exit;
+                            // print_r($res); exit;
                         if($wallet_history)
                         {
                             $user = User::find($request->user_id);
@@ -476,7 +476,7 @@ class RequestController extends Controller
                             $data['device_token'] = $user->device_token;
                             $data['request_id'] = $request->id;
                             $data['is_driver'] = 0;
-                            
+                            echo "success";
                             $res[] = User::sendNotification($data);
                             User::where('id', $user->id)->update(['is_available' => 1]);
                             return response()->json(['msg' => 'Request status update successfully', 'fcm' => $res]);
