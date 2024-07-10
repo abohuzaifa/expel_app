@@ -632,8 +632,12 @@ class RequestController extends Controller
         if($update)
         {
             $data = $this->carryRequestAfterPaymentChangeStatus($req->request_id);
-            echo $data; exit;
-            response()->json(['msg' => 'Request status update successfully']);
+            if($data == 1)
+            {
+                response()->json(['msg' => 'Request status update successfully']);
+            } else {
+                response()->json(['msg' => 'Request status updataion failed']);
+            }
         } else {
             return response()->json(['msg' => 'Payent status updation failed']);
         }
