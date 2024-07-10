@@ -439,7 +439,7 @@ class RequestController extends Controller
                         return response()->json(['msg' => 'Offer not found']);
                     }
                     $wallet = Wallet::where('user_id', $offer->user_id)->first();
-                    print_r($wallet); exit;
+                    // print_r($wallet); exit;
                     if(isset($wallet->id) && $wallet->id > 0)
                     {
                         $amount = $wallet->amount  - getFivePercent($request->amount) ;
@@ -466,6 +466,7 @@ class RequestController extends Controller
                             $data['is_driver'] = 1;
                             
                             $res[] = User::sendNotification($data);
+                            print_r($res); exit;
                         if($wallet_history)
                         {
                             $user = User::find($request->user_id);
