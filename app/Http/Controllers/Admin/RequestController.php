@@ -481,6 +481,8 @@ class RequestController extends Controller
                         }  else {
                             return response()->json(['msg' => 'History not created of current request']);
                         }
+                    } else {
+                        return response()->json("Wallet not updated, Something went wrong");
                     }
                 }
                 else {
