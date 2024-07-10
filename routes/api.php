@@ -172,6 +172,6 @@ Route::group(["middleware"=> "auth:sanctum"], function () {
     Route::post("/markChatRead", [MessageController::class, 'markChatRead'])->name('markChatRead');
 
     
-Route::post('/paymentStatus', [RequestController::class, 'paymentStatus'])->name('paymentStatus');
+    Route::post('/paymentStatus', [RequestController::class, 'paymentStatus'])->name('paymentStatus');
 
 });
