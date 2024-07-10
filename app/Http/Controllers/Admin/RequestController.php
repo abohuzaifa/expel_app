@@ -436,7 +436,7 @@ class RequestController extends Controller
                     $update = ModelRequest::where('id', $request_id)->update(['status' => 3]);
                     $offer = Offer::where('is_accept', 1)->find($request->offer_id);
                     if (is_null($offer) || is_null($offer->id)) {
-                        return response()->json(['msg' => 'Offer not found']);
+                        return 2;
                     }
                     $wallet = Wallet::where('user_id', $offer->user_id)->first();
                     // print_r($wallet); exit;
@@ -447,7 +447,7 @@ class RequestController extends Controller
                             'amount' => $amount
                         ]);
                     } else {
-                        return response()->json(['msg' => 'Driver wallet not found']);
+                        return 2;
                     }
                     if($walletUpdate)
                     {
@@ -478,13 +478,13 @@ class RequestController extends Controller
                             $data['is_driver'] = 0;
                             // echo "success";
                             $res[] = User::sendNotification($data);
-                            // User::where('id', $user->id)->update(['is_available' => 1]);
-                            return $res;
+                            User::where('id', $user->id)->update(['is_available' => 1]);
+                            return 1;
                         }  else {
-                            return response()->json(['msg' => 'History not created of current request']);
+                            return 2;
                         }
                     } else {
-                        return response()->json("Wallet not updated, Something went wrong");
+                        return 2;
                     }
                 }
                 else {
@@ -632,7 +632,8 @@ class RequestController extends Controller
         if($update)
         {
             $data = $this->carryRequestAfterPaymentChangeStatus($req->request_id);
-            response()->json(['msg' => 'Request status update successfully', 'fcm' => $data]);
+            echo $data; exit;
+            response()->json(['msg' => 'Request status update successfully']);
         } else {
             return response()->json(['msg' => 'Payent status updation failed']);
         }
