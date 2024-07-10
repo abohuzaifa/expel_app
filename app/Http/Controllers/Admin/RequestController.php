@@ -479,7 +479,7 @@ class RequestController extends Controller
                             // echo "success";
                             $res[] = User::sendNotification($data);
                             // User::where('id', $user->id)->update(['is_available' => 1]);
-                            return response()->json(['msg' => 'Request status update successfully', 'fcm' => $res]);
+                            return $res;
                         }  else {
                             return response()->json(['msg' => 'History not created of current request']);
                         }
@@ -631,7 +631,8 @@ class RequestController extends Controller
         
         if($update)
         {
-            $this->carryRequestAfterPaymentChangeStatus($req->request_id);
+            $data = $this->carryRequestAfterPaymentChangeStatus($req->request_id);
+            response()->json(['msg' => 'Request status update successfully', 'fcm' => $data]);
         } else {
             return response()->json(['msg' => 'Payent status updation failed']);
         }
