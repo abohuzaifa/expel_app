@@ -476,9 +476,9 @@ class RequestController extends Controller
                             $data['device_token'] = $user->device_token;
                             $data['request_id'] = $request->id;
                             $data['is_driver'] = 0;
-                            echo "success";
+                            // echo "success";
                             $res[] = User::sendNotification($data);
-                            User::where('id', $user->id)->update(['is_available' => 1]);
+                            // User::where('id', $user->id)->update(['is_available' => 1]);
                             return response()->json(['msg' => 'Request status update successfully', 'fcm' => $res]);
                         }  else {
                             return response()->json(['msg' => 'History not created of current request']);
