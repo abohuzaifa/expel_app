@@ -66,7 +66,7 @@ use App\Models\Offer;
       <a class="btn btn-info" href="{{ route('request.show',$item->id) }}">{{trans('lang.view')}}</a>
       <?php if($history) {
         $googleMapsUrl = "https://www.google.com/maps?q={$history->lat},{$history->long}";
-        echo '<a class="btn btn-primary" href="">'.trans('lang.tracking').'</a>';
+        echo '<a class="btn btn-primary" target="_blank" href="'.$googleMapsUrl.'">'.trans('lang.tracking').'</a>';
       } ?>
       
     </td>
