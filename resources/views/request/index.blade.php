@@ -64,7 +64,7 @@ use App\Models\Offer;
     <td>{{ ($item->status == 0 ? trans("lang.pending") : ($item->status == 1 || $item->status == 4 ? trans("lang.processing") : ($item->status == 2 ? trans("lang.cancel") : trans("lang.complete")))) }}</td>
     <td>
       <a class="btn btn-info" href="{{ route('request.show',$item->id) }}">{{trans('lang.view')}}</a>
-      <?php if($history) {
+      <?php if($history && $item->status == 3) {
         $googleMapsUrl = "https://www.google.com/maps?q={$history->lat},{$history->long}";
         echo '<a class="btn btn-primary" target="_blank" href="'.$googleMapsUrl.'">'.trans('lang.tracking').'</a>';
       } ?>
