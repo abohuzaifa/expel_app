@@ -11,7 +11,7 @@ class RequestController extends Controller
     public function index()
     {
         $data['perPage'] = 10;
-        $data['requests'] = ModelsRequest::with('user', 'offer.user')->paginate($data['perPage']);
+        $data['requests'] = ModelsRequest::with('user', 'offer.user')->orderBy('id', 'desc')->paginate($data['perPage']);
         // echo "<pre>"; print_r($data['requests']); exit;
         return view('request.index',$data);
     }
