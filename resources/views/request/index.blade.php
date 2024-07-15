@@ -1,4 +1,9 @@
-<?php //use App\Models\Offer; ?>
+<?php //use App\Models\Offer; 
+
+use App\Models\History;
+use App\Models\Offer;
+
+?>
 @extends('layouts.app')
 
 
@@ -43,7 +48,13 @@
  @endphp
  
  @foreach ($requests as $key => $item)
- <?php //echo"<pre>"; print_r($item); exit;?>
+ <?php 
+ $requestId = $item->id; // or the specific request_id you are looking for
+
+ $history = History::where('request_id', $requestId)
+                   ->orderBy('created_at', 'desc') // assuming you have a created_at timestamp
+                   ->first();
+ ?>
   <tr>
     <td>{{ ++$i }}</td>
     <td>{{ $item->parcel_address }}</td>
@@ -53,7 +64,11 @@
     <td>{{ ($item->status == 0 ? trans("lang.pending") : ($item->status == 1 || $item->status == 4 ? trans("lang.processing") : ($item->status == 2 ? trans("lang.cancel") : trans("lang.complete")))) }}</td>
     <td>
       <a class="btn btn-info" href="{{ route('request.show',$item->id) }}">{{trans('lang.view')}}</a>
-      <a class="btn btn-primary" href="{{ route('request.edit',$item->id) }}">{{trans('lang.tracking')}}</a>
+      <?php if($history) {
+        $googleMapsUrl = "https://www.google.com/maps?q={$history->lat},{$history->long}";
+        echo '<a class="btn btn-primary" href="">'.trans('lang.tracking').'</a>';
+      } ?>
+      
     </td>
     
   </tr>
