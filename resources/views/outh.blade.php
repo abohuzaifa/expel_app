@@ -8,8 +8,8 @@ if (!isset($_GET['code'])) {
 $authCode = $_GET['code'];
 
 // Set your client credentials and redirect URI
-$client_id = getenv('GOOGLE_CLIENT_ID_d');
-$client_secret = getenv('GOOGLE_CLIENT_SECRET_d');
+$client_id = getenv('GOOGLE_CLIENT_ID_junaid');
+$client_secret = getenv('GOOGLE_CLIENT_SECRET_junaid');
 $redirect_uri = 'http://localhost/expel_app/public/outh';
 $token_url = 'https://oauth2.googleapis.com/token';
 
@@ -82,4 +82,4 @@ $userInfo = json_decode($userInfoResponse, true);
 echo "User Info: <pre>" . print_r($userInfo, true) . "</pre>";
 ?>
 
-<!-- https://accounts.google.com/o/oauth2/auth?client_id=990392568575-jitq4hirb3vgph8evn1rsea9fhj3g33b.apps.googleusercontent.com&redirect_uri=http%3A%2F%2Flocalhost%2Fexpel_app%2Fpublic%2Fouth&response_type=code&scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Ffirebase.messaging&access_type=offline&prompt=consent&state=firebase_messaging -->
+<!-- https://accounts.google.com/o/oauth2/auth?client_id=1024991048436-it2tcsnnpoe4ulfgliaj45m0a9tq09pg.apps.googleusercontent.com&redirect_uri=http%3A%2F%2Flocalhost%2Fexpel_app%2Fpublic%2Fouth&response_type=code&scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Ffirebase.messaging&access_type=offline&prompt=consent&state=firebase_messaging -->
