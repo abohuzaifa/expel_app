@@ -66,7 +66,7 @@ class User extends Authenticatable
         return $this->hasMany(Notification::class);
     }
 
-    public static function sendNotification($data)
+    public static function sendPushNotification($data)
     {
         // $deviceToken = $data['device_token'];
         // $title = $data['title'];
@@ -184,15 +184,15 @@ class User extends Authenticatable
         return json_decode($result, true);
     }
 
-    public static function sendPushNotification($data)
+    public static function sendNotification($data)
     {
         
             $url = 'https://fcm.googleapis.com/v1/projects/opatra-d5bda/messages:send';
 
             // Set your client credentials and refresh token
-            $client_id = getenv('GOOGLE_CLIENT_ID');
-            $client_secret = getenv('GOOGLE_CLIENT_SECRET');
-            $refresh_token = getenv('DRIVER_REFRESH_TOKEN'); // Replace with your actual refresh token
+            $client_id = getenv('GOOGLE_CLIENT_ID_junaid');
+            $client_secret = getenv('GOOGLE_CLIENT_SECRET_junaid');
+            $refresh_token = getenv('DRIVER_REFRESH_TOKEN_junaid'); // Replace with your actual refresh token
         
         // echo $url; exit;
         $token_url = 'https://oauth2.googleapis.com/token';
