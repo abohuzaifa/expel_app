@@ -710,7 +710,7 @@ class RequestController extends Controller
         $data['request_id'] = '123';
         $data['is_driver'] = 1;
         // $data['device_token'] = 'dN-4DUh1TamgfSsYKPvjM0:APA91bEOO5VxmPUDrI4kskY-LF7btvIoToiHEJ5mNYPd3SGU6ESsgcKD7oCCSXaFpeUSC27NPbZ8xSjPE6BsLScCSQjyVy6Dv0Ltp-PFDob_wGtGyt1PkVo6gnf6UsZKOAm1LAvBuwri';
-        $data['device_token'] = 'e-sjmohcTKm7ZxoOmjGKKt:APA91bEtTqV-ihI6b0m4AxLXDEEwC4PHBb_2rBnvyxu-890_TRr18DZtNdiZ9hj3tQfyr-adgk6GE2C22HDqV5n39qGs2NI0Nnt9kRpYAZbrSsMydV-jotI';
+        $data['device_token'] = 'fNgw-S0gTLK31zOteYb4cf:APA91bHmN3vYB-j15RANZ9zQ6SmYibBHQ_Aux8MWLMYFIzA8tclshRpGn3EPeu7Y9gXtH7pF7dI2maSSgUvSF1UGSVtunoezIh5d9P9EkRvBzVuyCCxi4Fs';
         $response = User::sendPushNotification($data);
 
         print_r($response);
