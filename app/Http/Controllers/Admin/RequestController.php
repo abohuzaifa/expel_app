@@ -78,7 +78,7 @@ class RequestController extends Controller
             $data['is_driver'] = 1;
             // User::sendNotification($data);
             $parcel_city = $req->parcel_city;
-            $users = User::where('user_type', 2)->where('is_available', 1)
+            $users = User::where('user_type', 2)
                     ->whereRaw('? LIKE CONCAT("%", city, "%")', [$parcel_city])
                     ->get();
             if(count($users) > 0)
