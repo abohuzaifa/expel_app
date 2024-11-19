@@ -229,7 +229,7 @@ class CategoryController extends Controller
                 'user' => function ($query) {
                     $query->select('id', 'name', 'email', 'mobile', 'latitude', 'longitude', 'street_address');
                 }
-            ])->where('user_id', $userId)
+            ])->where('user_id', $userId)->where('is_accept', 1)
             ->get();
     
             if(count($offers) > 0)
