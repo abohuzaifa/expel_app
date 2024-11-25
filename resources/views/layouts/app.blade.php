@@ -23,8 +23,8 @@
 
 
   <!-- Favicons -->
-  <link href="{{asset('img/favicon.PNG')}}" rel="icon">
-  <link href="assets/img/apple-touch-icon.PNG" rel="apple-touch-icon">
+  <link href="{{asset('img/favicon.png')}}" rel="icon">
+  <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
 
   <!-- Google Fonts -->
   <link href="https://fonts.gstatic.com" rel="preconnect">
@@ -50,7 +50,7 @@
         @else
                <!-- Preloader -->
           <div class="preloader flex-column justify-content-center align-items-center">
-            <img class="animation__wobble" src="{{asset('img/logo.PNG')}}" alt="AdminLTELogo" height="60" width="60">
+            <img class="animation__wobble" src="{{asset('img/logo.png')}}" alt="AdminLTELogo" height="60" width="60">
           </div>
 
        @include('layouts.penal.nav')
