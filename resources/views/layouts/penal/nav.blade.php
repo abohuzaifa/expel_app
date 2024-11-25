@@ -3,7 +3,7 @@
 
     <div class="d-flex align-items-center justify-content-between">
       <a href="{{route('home')}}" class="logo d-flex align-items-center">
-        <img src="<?= asset("img/logo.jpg") ?>" alt="">
+        <img src="<?= asset("img/logo.PNG") ?>" alt="">
         <span class="d-none d-lg-block">{{ trans('lang.labeey') }}{{Session::get('branch_id')}}</span>
       </a>
       <i class="bi bi-list toggle-sidebar-btn"></i>
