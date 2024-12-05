@@ -65,7 +65,6 @@ Route::group(["middleware"=> "auth:sanctum"], function () {
     Route::post('/parcelConfirmationApi', [RequestController::class, 'parcelConfirmationApi'])->name('parcelConfirmationApi');
     Route::get('/near_by_drivers', [RequestController::class, 'near_by_drivers'])->name('near_by_drivers');
     Route::post('/tracking', [RequestController::class, 'tracking'])->name('tracking');
-    Route::get('/allUserRides', [RequestController::class, 'allUserRides'])->name('allUserRides');
 
     Route::post('/addTrip', [TripController::class, 'addTrip'])->name('addTrip');
 
@@ -75,6 +74,7 @@ Route::group(["middleware"=> "auth:sanctum"], function () {
     
     Route::get('/dashboardRequest', [CategoryController::class, 'dashboardRequest'])->name('dashboardRequest');
     Route::get('/currentRidesList', [CategoryController::class, 'currentRidesList'])->name('currentRidesList');
+    Route::get('/allUserRides', [CategoryController::class, 'allUserRides'])->name('allUserRides');
 
     // history section 
     Route::post('/createHistory', [HistoryController::class, 'createHistory'])->name('createHistory');
