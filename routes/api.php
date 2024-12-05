@@ -65,6 +65,7 @@ Route::group(["middleware"=> "auth:sanctum"], function () {
     Route::post('/parcelConfirmationApi', [RequestController::class, 'parcelConfirmationApi'])->name('parcelConfirmationApi');
     Route::get('/near_by_drivers', [RequestController::class, 'near_by_drivers'])->name('near_by_drivers');
     Route::post('/tracking', [RequestController::class, 'tracking'])->name('tracking');
+    Route::get('/allUserRides', [RequestController::class, 'allUserRides'])->name('allUserRides');
 
     Route::post('/addTrip', [TripController::class, 'addTrip'])->name('addTrip');
 

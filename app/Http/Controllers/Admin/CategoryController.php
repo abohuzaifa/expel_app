@@ -215,7 +215,7 @@ class CategoryController extends Controller
     
         return $distance;
     }
-    public function currentRidesList()
+    public function currentRidesList($flag = "")
     {
         $user = auth()->user();
         if($user->user_type == 2)
@@ -244,14 +244,18 @@ class CategoryController extends Controller
                 return response()->json(['data' => []]);
             }
         }   
-        $requestIds = ModelsRequest::where('user_id', auth()->user()->id)->where('status', 1)->pluck('id');
+        if($flag == 'all'){
+            $requestIds = ModelsRequest::where('user_id', auth()->user()->id)->pluck('id');
+        } else {
+            $requestIds = ModelsRequest::where('user_id', auth()->user()->id)->where('status', 1)->pluck('id');
+        }
         // print_r($requestIds); exit;
         $requestIds = json_decode(json_encode($requestIds), true);
         if(count($requestIds) > 0)
         {
             $offers = Offer::with([
                 'request' => function($query) use ($requestIds) {
-                    $query->select('id', 'user_id', 'parcel_lat', 'parcel_long', 'parcel_address',  'receiver_lat', 'receiver_long', 'receiver_address')
+                    $query->select('*')
                         ->whereIn('id', $requestIds); // Filter the requests by specified IDs
                     // If you want to include user data related to the request, uncomment the following:
                     // ->with(['user' => function($query) {
@@ -299,6 +303,13 @@ class CategoryController extends Controller
                 'currentRides' => $this->currentRidesList()
             ], 404);
         }
+    }
+    public function allUserRides()
+    {
+        return response([
+            'status' => 1,
+            'allRides' => $this->currentRidesList('all')
+        ]);
     }
     public function getAllCategories()
     {
