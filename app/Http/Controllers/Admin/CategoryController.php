@@ -284,6 +284,53 @@ class CategoryController extends Controller
         }
         
     }
+    public function allRequests($flag = "")
+    {
+        $user = auth()->user();
+        if($user->user_type == 2)
+        {
+            $userId = $user->id; // Make sure $user is the authenticated user or correctly passed
+
+            $offers = Offer::with([
+                'request' => function ($query) {
+                    $query->select('id', 'user_id', 'parcel_lat', 'parcel_long', 'parcel_address', 'receiver_lat', 'receiver_long', 'receiver_address');
+                },
+                'user' => function ($query) {
+                    $query->select('id', 'name', 'email', 'mobile', 'latitude', 'longitude', 'street_address');
+                }
+            ])->where('user_id', $userId)->where('is_accept', 1)
+            ->get();
+    
+            if(count($offers) > 0)
+            {
+                foreach($offers as $key => $offer)
+                {
+    
+                    $offers[$key]['data'] = $this->calculateDistanceAndTime($offer->request->parcel_lat,$offer->request->parcel_long, $offer->user->latitude, $offer->user->longitude);
+                }
+                return response()->json(['data' => $offers]);
+            } else {
+                return response()->json(['data' => []]);
+            }
+        }   
+        if($flag == 'all'){
+            $requests = ModelsRequest::where('user_id', auth()->user()->id)->get();
+            if($requests->count() > 0)
+            {
+                foreach($requests as $key => $req)
+                {
+                    $requests[$key]['offer'] = Offer::find($req->offer_id);
+                }
+                return $requests;
+            } else {
+                return [];
+            }
+        } else {
+            return [];
+        }
+        
+        
+    }
     public function dashboardRequest()
     {
         $categories = DB::select("SELECT * FROM categories WHERE status=1");
@@ -308,7 +355,7 @@ class CategoryController extends Controller
     {
         return response([
             'status' => 1,
-            'allRides' => $this->currentRidesList('all')
+            'allRides' => $this->allRequests('all')
         ]);
     }
     public function getAllCategories()
