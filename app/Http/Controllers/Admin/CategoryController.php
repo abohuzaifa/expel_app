@@ -314,7 +314,7 @@ class CategoryController extends Controller
             }
         }   
         if($flag == 'all'){
-            $requests = ModelsRequest::where('user_id', auth()->user()->id)->get();
+            $requests = ModelsRequest::with('user')->where('user_id', auth()->user()->id)->get();
             if($requests->count() > 0)
             {
                 foreach($requests as $key => $req)
