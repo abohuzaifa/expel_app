@@ -66,6 +66,12 @@ class RequestController extends Controller
         ]);
         if($request)
         {
+            $res = [];
+            if($req->receiver_lat == ""){
+                $dd['mobile'] = $req->receiver_mobile ;
+                $dd['code'] = $request->id;
+                $res = receiverWhatsappAddress($dd);
+            }
             $notification = new Notification();
             $notification->user_id = auth()->user()->id; // Assuming the user is authenticated
             $notification->message = 'Your Request created Successfully';
@@ -91,9 +97,7 @@ class RequestController extends Controller
                     }
                 }
             }
-                return response()->json(['msg' => 'success', 'request' => $request, 'drivers' => $users]);
-            
-            
+                return response()->json(['msg' => 'success', 'request' => $request, 'drivers' => $users, 'whatsapp_msg_status' => $res]);
         } else {
             return response()->json(['msg' => 'Something went wrong']);
         }

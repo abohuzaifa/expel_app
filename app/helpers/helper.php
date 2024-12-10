@@ -79,7 +79,7 @@ function send_message($data, $mobile)
         "to" => $mobile,
         "type" => "template",
         "template" => [
-            "name" => "parcel_template_code",
+            "name" => "parcel_receiver_address_template ",
             "language" => ["code" => "en"],
             "components" => [
                 [
@@ -94,13 +94,58 @@ function send_message($data, $mobile)
             ]
         ]
     ]);
-    curl_setopt($ch, CURLOPT_URL, 'https://graph.facebook.com/v16.0/116750164666647/messages');
+    curl_setopt($ch, CURLOPT_URL, 'https://graph.facebook.com/v21.0/378517282013470/messages');
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     curl_setopt($ch, CURLOPT_POST, 1);
     curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
 
     $headers = array();
-    $headers[] = 'Authorization: Bearer EAAHpsDJRFp0BO4BuWb3p8La3Nte3E8wccZCy5m4QJMV7X1NbSugSKVjZAy4nEBI2wevVpbDQ9RFKQdlHNeSwbDCA4GEzSxw4Rg8913V7u8LGin7vlbQymwHpWhCllY20xRSncKB0F026oq5jgKWM6fzxooX0H8jMc4YrputVvwQwvgDoDIF4ZBsbtR0iwCvAU7zZC6zz3ZAKI6rqG';
+    $headers[] = 'Authorization: Bearer EAAOh9TZC2MtUBOZCzd0p4u5w9YoFZAqLJF7sZBMsdDdirZCvZChVUj5UZCNv4yqZAwyXHFIEb4QFbv7qLDGhPFcwZA0fJuNYlfe23qx7wPeZCxaWdcNya1aRZC7hdZCuEpf49gWKk28rgT2twDWmFOq8yg7I3A2v1emQZBWdoQhPTu78UUjqNSwkBTBZBmhnUjSHF3yyjHDAZDZD';
+    $headers[] = 'Content-Type: application/json';
+    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+
+    $result = curl_exec($ch);
+    if (curl_errno($ch)) {
+        echo 'Error:' . curl_error($ch);
+    }
+    curl_close($ch);
+    $result = json_decode($result, true);
+    return $result;
+}
+function receiverWhatsappAddress($data)
+{
+    $ch = curl_init();
+
+    $payload = json_encode([
+        "messaging_product" => "whatsapp",
+        "recipient_type" => "individual",
+        "to" => $data['mobile'],
+        "type" => "template",
+        "template" => [
+            "name" => "parcel_receiver_address_template ",
+            "language" => ["code" => "en"],
+            "components" => [
+                [
+                    "type" => "button",
+                    "index" => 0,
+                    "sub_type" => "url",
+                    "parameters" => [
+                        [
+                            "type" => "text",
+                            "text" => "?data=".base64_encode($data['code'])
+                        ]
+                    ]
+                ]
+            ]
+        ]
+    ]);
+    curl_setopt($ch, CURLOPT_URL, 'https://graph.facebook.com/v21.0/378517282013470/messages');
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_POST, 1);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+
+    $headers = array();
+    $headers[] = 'Authorization: Bearer EAAOh9TZC2MtUBOZCzd0p4u5w9YoFZAqLJF7sZBMsdDdirZCvZChVUj5UZCNv4yqZAwyXHFIEb4QFbv7qLDGhPFcwZA0fJuNYlfe23qx7wPeZCxaWdcNya1aRZC7hdZCuEpf49gWKk28rgT2twDWmFOq8yg7I3A2v1emQZBWdoQhPTu78UUjqNSwkBTBZBmhnUjSHF3yyjHDAZDZD';
     $headers[] = 'Content-Type: application/json';
     curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 
