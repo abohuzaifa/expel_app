@@ -314,7 +314,10 @@ class CategoryController extends Controller
             }
         }   
         if($flag == 'all'){
-            $requests = ModelsRequest::with('user')->where('user_id', auth()->user()->id)->get();
+            $requests = ModelsRequest::with('user')
+            ->where('user_id', auth()->user()->id)
+            ->orderBy('id', 'desc') // Sort by status in ascending order
+            ->get();
             if($requests->count() > 0)
             {
                 foreach($requests as $key => $req)
