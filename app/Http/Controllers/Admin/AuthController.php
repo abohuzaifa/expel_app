@@ -100,7 +100,7 @@ class AuthController extends Controller
     {
         $attrs = $req->validate([
             "name"=> "required|string",
-            "email"=> "required|email|unique:users,email",
+            // "email"=> "required|email|unique:users,email",
             "password"=> "required|min:6|confirmed",
             'mobile' => 'required|unique:users',
             'user_type'=> 'required|int',
