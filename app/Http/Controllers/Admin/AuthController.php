@@ -122,7 +122,7 @@ class AuthController extends Controller
             "status"=> 1,
             "category_id" => $req->vehicle_type,
             "driving_license" => $req->driving_license ?? "",
-            "bank_id" => $req->bank_id ?? "",
+            "bank_id" => $req->bank_id ?? 0,
             "bank_account" => $req->bank_account,
             "name_ar" => $req->name_ar,
             'iban' => $req->iban
