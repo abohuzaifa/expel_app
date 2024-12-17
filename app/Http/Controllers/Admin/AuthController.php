@@ -113,7 +113,7 @@ class AuthController extends Controller
         $randomNumber = rand(100000, 999999);
         $user = User::create([
             "name"=> $attrs["name"],
-            "email"=> $attrs["email"],
+            "email"=> $req->email,
             "mobile" => $attrs["mobile"],
             "user_type" => $attrs['user_type'],
             "password"=> bcrypt($attrs["password"]),
@@ -125,6 +125,7 @@ class AuthController extends Controller
             "bank_id" => $req->bank_id ?? "",
             "bank_account" => $req->bank_account,
             "name_ar" => $req->name_ar,
+            'iban' => $req->iban
         ]);
         if($user)
         {
