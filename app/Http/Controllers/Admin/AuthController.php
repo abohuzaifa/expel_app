@@ -121,8 +121,8 @@ class AuthController extends Controller
             "street_address" => $req->address,
             "status"=> 1,
             "category_id" => $req->vehicle_type,
-            "driving_license" => $req->driving_license,
-            "bank_id" => $req->bank_id,
+            "driving_license" => $req->driving_license ?? "",
+            "bank_id" => $req->bank_id ?? "",
             "bank_account" => $req->bank_account,
             "name_ar" => $req->name_ar,
         ]);
