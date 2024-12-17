@@ -105,9 +105,9 @@ class AuthController extends Controller
             'mobile' => 'required|unique:users',
             'user_type'=> 'required|int',
             'vehicle_type' => 'required|int',
-            'driving_license' => 'required',
-            'bank_id' => 'required|int',
-            'bank_account' => 'required',
+            // 'driving_license' => 'required',
+            // 'bank_id' => 'required|int',
+            // 'bank_account' => 'required',
 
         ]);
         $randomNumber = rand(100000, 999999);
