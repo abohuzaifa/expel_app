@@ -91,9 +91,13 @@ class RequestController extends Controller
             {
                 foreach($users as $driver)
                 {
-                    $data['device_token'] = $driver->device_token;
-                    if($data['device_token'] && $data['device_token'] != ""){
-                        User::sendNotification($data);
+
+                    if($this->calculateDistanceAndTime($req->parcel_lat, $req->parcel_long, $driver->latitude, $driver->longitude) == true)
+                    {
+                        $data['device_token'] = $driver->device_token;
+                        if($data['device_token'] && $data['device_token'] != ""){
+                            User::sendNotification($data);
+                        }
                     }
                 }
             }
@@ -155,27 +159,14 @@ class RequestController extends Controller
             // print_r($data); exit;
             // Extract distance in meters
             $distance = $data['rows'][0]['elements'][0]['distance']['value'];
-            // echo "<pre>";    print_r($data); exit;
-            // Convert distance to kilometers
-            $distanceInKm = $distance / 1000;
-            // echo $distanceInKm; exit;
-            // Extract duration in seconds
-            $duration = $data['rows'][0]['elements'][0]['duration']['value'];
-
-            // Convert duration to minutes
-            $durationInMinutes = $duration / 60;
-
-            // Extract the estimated arrival time
-            $arrivalTime = now()->addMinutes($durationInMinutes);
-
-            return response()->json([
-                'distance' => $distanceInKm, // Distance in kilometers
-                'duration' => $durationInMinutes, // Duration in minutes
-                'arrival_time' => $arrivalTime, // Estimated arrival time
-            ]);
+            if(doubleval($distance) <= 30000)
+            {
+                return true;
+            } else {
+                return false;
+            }
         } else {
-            // If the response status is not OK, return an error
-            return response()->json(['error' => 'Unable to calculate distance and time.']);
+            return false;
         }
     }
     function calculateDistance($lat1, $lon1, $lat2, $lon2) {
@@ -711,13 +702,14 @@ class RequestController extends Controller
     function test()
     {
         $data = [];
-        $data['title'] = 'Parcel Collected';
-        $data['body'] = 'Your parcel on the way, click to track your parcel';
+        $data['title'] = 'Test Notification';
+        $data['body'] = 'Test Notification Description';
         $data['request_id'] = '123';
         $data['is_driver'] = 1;
         // $data['device_token'] = 'dN-4DUh1TamgfSsYKPvjM0:APA91bEOO5VxmPUDrI4kskY-LF7btvIoToiHEJ5mNYPd3SGU6ESsgcKD7oCCSXaFpeUSC27NPbZ8xSjPE6BsLScCSQjyVy6Dv0Ltp-PFDob_wGtGyt1PkVo6gnf6UsZKOAm1LAvBuwri';
         $data['device_token'] = 'fNgw-S0gTLK31zOteYb4cf:APA91bHmN3vYB-j15RANZ9zQ6SmYibBHQ_Aux8MWLMYFIzA8tclshRpGn3EPeu7Y9gXtH7pF7dI2maSSgUvSF1UGSVtunoezIh5d9P9EkRvBzVuyCCxi4Fs';
-        $response = User::sendPushNotification($data);
+        $data['device_toke'] = 'emLzXkj0S1SyVoUMOyBajJ:APA91bE0RqT6JUcxkeQCA7DCPBD6FQBhNsfnJTat3rQD-_HrduRU-2_llkWHlv9Mi_ml6-X-uq8FA9BazGnUVXsqQcmm0sAiiOwkFFv4-6Ao4Z2W1EHC_SE';
+        $response = User::sendNotification($data);
 
         print_r($response);
     }
