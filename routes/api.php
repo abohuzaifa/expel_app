@@ -50,6 +50,7 @@ Route::get("/getBanners", [BannerController::class, 'getBanners'])->name('getBan
 Route::get('/getCategory/{id}', [CategoryController::class, 'getCategory'])->name('getCategory');
 Route::get('/adminChoiceCategories', [CategoryController::class,'adminChoiceCategories'])->name('adminChoiceCategories');
 Route::post('/test', [RequestController::class, 'test'])->name('test');
+Route::get('/cities', [TripController::class, 'cities'])->name('cities');
 Route::post('/receiverAddressUpdate', [RequestController::class, 'receiverAddressUpdate'])->name('receiverAddressUpdate');
 
 // protected routes

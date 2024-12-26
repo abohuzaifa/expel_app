@@ -17,6 +17,7 @@ use GuzzleHttp\Client;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Symfony\Component\HttpKernel\EventListener\ValidateRequestListener;
 
 class RequestController extends Controller
 {
@@ -24,8 +25,8 @@ class RequestController extends Controller
     public function createRequest(Request $req)
     {
         $req->validate([
-            // 'from_date' => 'required',
-            // 'to_date' => 'required',
+            'from' => 'required|int',
+            'to' => 'required|int',
             'parcel_lat' => 'required',
             'parcel_long' => 'required',
             'parcel_address' => 'required',
@@ -62,16 +63,18 @@ class RequestController extends Controller
             'receiver_long' => $req->receiver_long,
             'receiver_address' => $req->receiver_address,
             'receiver_mobile' => $req->receiver_mobile,
-            'category_id' => $req->category_id
+            'category_id' => $req->category_id,
+            'from_city' => $req->from,
+            'to_city' => $req->to
         ]);
         if($request)
         {
             $res = [];
-            if($req->receiver_lat == ""){
-                $dd['mobile'] = $req->receiver_mobile ;
-                $dd['code'] = $request->id;
-                $res = receiverWhatsappAddress($dd);
-            }
+            // if($req->receiver_lat == ""){
+            //     $dd['mobile'] = $req->receiver_mobile ;
+            //     $dd['code'] = $request->id;
+            //     $res = receiverWhatsappAddress($dd);
+            // }
             $notification = new Notification();
             $notification->user_id = auth()->user()->id; // Assuming the user is authenticated
             $notification->message = 'Your Request created Successfully';
@@ -92,13 +95,13 @@ class RequestController extends Controller
                 foreach($users as $driver)
                 {
 
-                    if($this->calculateDistanceAndTime($req->parcel_lat, $req->parcel_long, $driver->latitude, $driver->longitude) == true)
-                    {
+                    // if($this->calculateDistanceAndTime($req->parcel_lat, $req->parcel_long, $driver->latitude, $driver->longitude) == true)
+                    // {
                         $data['device_token'] = $driver->device_token;
                         if($data['device_token'] && $data['device_token'] != ""){
                             User::sendNotification($data);
                         }
-                    }
+                    // }
                 }
             }
                 return response()->json(['msg' => 'success', 'request' => $request, 'drivers' => $users, 'whatsapp_msg_status' => $res]);
@@ -265,9 +268,15 @@ class RequestController extends Controller
             // print_r($payment); exit;
             if(isset($payment['invoice_id']))
             {
+                
+                $wdata['code'] = $req->request_id."|".generateRandomCode();
                 $request = DB::table('requests')->where('id', $req->request_id)->update([
                     'invoice_id' => $payment['invoice_id'],
-                    'amount' => $req->amount
+                    'offer_id' => $req->offer_id,
+                    'amount' => $req->amount,
+                    'status' => 1,
+                    'code' => $wdata['code'],
+                    "payment_method" => $req->payment_method
                 ]);
                 if($request)
                 {
@@ -284,10 +293,17 @@ class RequestController extends Controller
                     $data['device_token'] = $driver->device_token;
                     $data['is_driver'] = 1;
                     $data['request_id'] = $req->request_id;
-                    
+                    $waba = [];
+                    $user_req = ModelRequest::find($req->request_id);
+                    if(empty($user_req->receiver_lat) || $user_req->receiver_lat == NULL){
+                        $dd['mobile'] = $user_req->receiver_mobile ;
+                        $dd['code'] = $req->request_id;
+                        $waba = receiverWhatsappAddress($dd);
+                    }
+                    $whatsapp = send_message($wdata, $user_req->receiver_mobile);
                     $res = User::sendNotification($data);
                     // User::where('id', $driver->id)->update(['is_available' => 0]);
-                    return response()->json(['data' => $payment, 'pn_status' => $res]);
+                    return response()->json(['data' => $payment, 'pn_status' => $res, 'waba' => $waba]);
                 } else {
                     return response()->json(['msg' => "Update method fails"]);
                 }
@@ -308,6 +324,12 @@ class RequestController extends Controller
                 {
                     $user_req = ModelRequest::where('id', $req->request_id)->first();
                     $whatsapp = send_message($wdata, $user_req->receiver_mobile);
+                    $waba = "";
+                    if(empty($user_req->receiver_lat) || $user_req->receiver_lat == NULL){
+                        $dd['mobile'] = $user_req->receiver_mobile ;
+                        $dd['code'] = $req->request_id;
+                        $waba = receiverWhatsappAddress($dd);
+                    }
                     $offer = Offer::find($req->offer_id);
                     Offer::where('id', $req->offer_id)->update(['is_accept' => 1]);
                     $driver = User::find($offer->user_id);
@@ -327,7 +349,7 @@ class RequestController extends Controller
 
                     // User::where('id', $driver->id)->update(['is_available' => 0]);
                     return response()->json(['data' => [
-                        'msg' => 'Request accepted successfully (COD)', 'pn_status' => $res, 'whatsapp' => $whatsapp
+                        'msg' => 'Request accepted successfully (COD)', 'pn_status' => $res, 'whatsapp' => $whatsapp, "waba" => $waba
                     ]]);
                 } else {
                     return response()->json(['msg' => "Update method fails"]);
