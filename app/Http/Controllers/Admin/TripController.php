@@ -18,6 +18,7 @@ class TripController extends Controller
             'date' => 'required|date',
             'time' => 'required',
              'description' => 'nullable|string',
+             'price' => 'required|int'
         ]);
         $user = auth()->user();
 
@@ -27,6 +28,7 @@ class TripController extends Controller
             'date' => $req->date,
             'time' => $req->time,
             'user_id' => $user->id,
+            'price' => $req->price,
             'description' => $req->description
         ]);
 
@@ -40,5 +42,17 @@ class TripController extends Controller
     {
         $cities = City::all();
         return response()->json($cities);
+    }
+
+    function tripList()
+    {
+        return response()->json($this->getUpcomingTrips());
+    }
+    public function getUpcomingTrips()
+    {
+        // Combine date and time fields for comparison
+        return Trip::whereRaw("STR_TO_DATE(CONCAT(`date`, ' ', `time`), '%Y-%m-%d %H:%i:%s') >= ?", [now()])
+                ->orderByRaw("STR_TO_DATE(CONCAT(`date`, ' ', `time`), '%Y-%m-%d %H:%i:%s')")
+                ->get();
     }
 }

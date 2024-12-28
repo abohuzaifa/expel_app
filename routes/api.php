@@ -68,6 +68,7 @@ Route::group(["middleware"=> "auth:sanctum"], function () {
     Route::post('/tracking', [RequestController::class, 'tracking'])->name('tracking');
 
     Route::post('/addTrip', [TripController::class, 'addTrip'])->name('addTrip');
+    Route::get('/userOffers', [TripController::class, 'tripList'])->name('userOffers');
 
     Route::post('/addOffer', [OfferController::class, 'addOffer'])->name('addOffer');
     Route::post('/declineOffer', [OfferController::class, 'declineOffer'])->name('declineOffer');
