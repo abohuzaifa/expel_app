@@ -46,7 +46,16 @@ class TripController extends Controller
 
     function tripList()
     {
-        return response()->json($this->getUpcomingTrips());
+        $user = auth()->user();
+        if($user->user_type == 1)
+        {
+            return response()->json($this->getUpcomingTrips());
+        } else {
+            $trips = Trip::where('user_id', $user->id)->whereRaw("STR_TO_DATE(CONCAT(`date`, ' ', `time`), '%Y-%m-%d %H:%i:%s') >= ?", [now()])
+                ->orderByRaw("STR_TO_DATE(CONCAT(`date`, ' ', `time`), '%Y-%m-%d %H:%i:%s')")
+                ->get();
+            return response()->json($trips);
+        }
     }
     public function getUpcomingTrips()
     {
