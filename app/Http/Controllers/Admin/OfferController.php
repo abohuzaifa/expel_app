@@ -40,7 +40,7 @@ class OfferController extends Controller
                 $data['device_token'] = $user->device_token;
                 $data['request_id'] = $req->request_id;
                 $data['is_driver'] = 0;
-                print_r($data); exit;
+                print_r($data); print_r($driver);exit;
                 $res = User::sendNotification($data);
                 return response()->json([
                     'msg' => 'success',
