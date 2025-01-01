@@ -14,6 +14,7 @@ class Trip extends Model
         'to',
         'date',
         'time',
+        'price',
         'user_id',
     ];
 
