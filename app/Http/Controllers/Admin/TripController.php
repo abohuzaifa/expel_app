@@ -47,15 +47,29 @@ class TripController extends Controller
     function tripList()
     {
         $user = auth()->user();
+        $res = [];
         if($user->user_type == 1)
         {
-            return response()->json($this->getUpcomingTrips());
+            $trips = $this->getUpcomingTrips();
+            foreach($trips as $trip)
+            {
+                $trip->from = City::find($trip->from);
+                $trip->to = City::find($trip->to);
+                $res[] = $trip;
+            }
         } else {
             $trips = Trip::where('user_id', $user->id)->whereRaw("STR_TO_DATE(CONCAT(`date`, ' ', `time`), '%Y-%m-%d %H:%i:%s') >= ?", [now()])
                 ->orderByRaw("STR_TO_DATE(CONCAT(`date`, ' ', `time`), '%Y-%m-%d %H:%i:%s')")
                 ->get();
-            return response()->json($trips);
+            foreach($trips as $trip)
+            {
+                $trip->from = City::find($trip->from);
+                $trip->to = City::find($trip->to);
+                $res[] = $trip;
+            }
         }
+        
+        return response()->json($res);
     }
     public function getUpcomingTrips()
     {
