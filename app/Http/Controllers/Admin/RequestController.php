@@ -727,10 +727,10 @@ class RequestController extends Controller
         $data['title'] = 'Test Notification';
         $data['body'] = 'Test Notification Description';
         $data['request_id'] = '123';
-        $data['is_driver'] = 1;
+        $data['is_driver'] = 0;
         // $data['device_token'] = 'dN-4DUh1TamgfSsYKPvjM0:APA91bEOO5VxmPUDrI4kskY-LF7btvIoToiHEJ5mNYPd3SGU6ESsgcKD7oCCSXaFpeUSC27NPbZ8xSjPE6BsLScCSQjyVy6Dv0Ltp-PFDob_wGtGyt1PkVo6gnf6UsZKOAm1LAvBuwri';
-        $data['device_token'] = 'fNgw-S0gTLK31zOteYb4cf:APA91bHmN3vYB-j15RANZ9zQ6SmYibBHQ_Aux8MWLMYFIzA8tclshRpGn3EPeu7Y9gXtH7pF7dI2maSSgUvSF1UGSVtunoezIh5d9P9EkRvBzVuyCCxi4Fs';
-        $data['device_toke'] = 'emLzXkj0S1SyVoUMOyBajJ:APA91bE0RqT6JUcxkeQCA7DCPBD6FQBhNsfnJTat3rQD-_HrduRU-2_llkWHlv9Mi_ml6-X-uq8FA9BazGnUVXsqQcmm0sAiiOwkFFv4-6Ao4Z2W1EHC_SE';
+        // $data['device_token'] = 'fNgw-S0gTLK31zOteYb4cf:APA91bHmN3vYB-j15RANZ9zQ6SmYibBHQ_Aux8MWLMYFIzA8tclshRpGn3EPeu7Y9gXtH7pF7dI2maSSgUvSF1UGSVtunoezIh5d9P9EkRvBzVuyCCxi4Fs';
+        $data['device_token'] = 'cDv-NH4XQV6CtSmIAPq-AQ:APA91bHKqLCYKQbrgDuekluHaIERpATzlM7zm5WHq5ECJWfrENRibcQRl_ibQa6DDx0QMbd_DLqvi1N2wAhP_6be6nSQ653MyeaajTx60nqpECDnb0Ds298';
         $response = User::sendNotification($data);
 
         print_r($response);
