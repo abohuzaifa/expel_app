@@ -22,6 +22,7 @@ use App\Http\Controllers\PaymentMethod;
 use App\Http\Controllers\RequestController;
 use App\Http\Controllers\WalletController;
 use App\Http\Controllers\AddressController;
+use App\Http\Controllers\PageController;
 
 /*
 |--------------------------------------------------------------------------
@@ -39,6 +40,8 @@ Route::get('/success/{id}/{offer_id}', [SuccessController::class, 'index'])->nam
 Route::get('/address', [AddressController::class, 'showMap'])->name('address');
 Route::post('/address/save', [AddressController::class, 'saveAddress'])->name('address.save');
 Route::get('/charge_in/{id}', [SuccessController::class, 'charge_in'])->name('charge_in');
+Route::get('/privacy-policy', [PageController::class, 'privacyPolicy'])->name('privacy.policy');
+
 Route::get('/', function () {
     return redirect()->route('home');
 });
