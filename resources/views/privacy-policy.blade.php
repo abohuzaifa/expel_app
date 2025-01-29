@@ -19,6 +19,7 @@
                 <li>Delivery Information: Pickup and drop-off addresses, package details, and special instructions.</li>
                 <li>Device Information: IP address, device type, and operating system.</li>
                 <li>Usage Data: App usage patterns, preferences, and interactions.</li>
+                <li>Location Data: Our app may collect and use your location data to provide location-based services.</li>
             </ul>
         </section>
 
@@ -30,6 +31,7 @@
                 <li>To communicate with you regarding delivery updates and support requests.</li>
                 <li>To enhance your experience through personalized services.</li>
                 <li>To ensure compliance with legal and regulatory requirements.</li>
+                <li>To provide location-based services that enhance app functionality and improve service accuracy.</li>
             </ul>
         </section>
 
