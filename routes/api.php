@@ -16,7 +16,7 @@ use App\Http\Controllers\Admin\OfferController;
 use App\Http\Controllers\Admin\RequestController;
 use App\Http\Controllers\Admin\TripController;
 use App\Http\Controllers\Admin\WalletController;
-use App\Http\Controllers\Admin\NotificationController;
+use App\Http\Controllers\Admin\NotificationApiController;
 use App\Http\Controllers\BannerController;
 use App\Http\Controllers\Location;
 
@@ -178,7 +178,7 @@ Route::group(["middleware"=> "auth:sanctum"], function () {
     
     Route::post('/paymentStatus', [RequestController::class, 'paymentStatus'])->name('paymentStatus');
 
-    Route::patch('/notifications/{id}/read', [NotificationController::class, 'markAsRead']);
-    Route::patch('/notifications/read-all', [NotificationController::class, 'markAllAsRead']);
+    Route::patch('/notifications/{id}/read', [NotificationApiController::class, 'markAsRead']);
+    Route::patch('/notifications/read-all', [NotificationApiController::class, 'markAllAsRead']);
 
 });
