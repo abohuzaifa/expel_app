@@ -363,6 +363,10 @@ class AuthController extends Controller
               return response([
                   'user' => auth()->user(),
                   'token' => auth()->user()->createToken('secret')->plainTextToken,
+                  'notifictionSettings' => UserNotificationSetting::firstOrCreate(
+                        ['user_id' => $user->id],
+                        UserNotificationSetting::getDefaultSettings()
+                    )
               ], 200);
      } else {
           return response([
