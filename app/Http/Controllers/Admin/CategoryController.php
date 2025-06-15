@@ -8,6 +8,8 @@ use App\Models\Category;
 use App\Models\Offer;
 use App\Models\Request as ModelsRequest;
 use App\Models\Shop;
+use App\Models\Wallet;
+use App\Models\WalletHistory;
 use GuzzleHttp\Client;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -337,6 +339,17 @@ class CategoryController extends Controller
     public function dashboardRequest()
     {
         $categories = DB::select("SELECT * FROM categories WHERE status=1");
+        $wallet = Wallet::where('user_id', auth()->user()->id)->first();
+        $user = auth()->user();
+        $balance = 0;
+        $total_earn = 0;
+        $total_withdraw = 0;
+        if($wallet && $user->user_type == 2)
+        {
+            $balance = $wallet->amount;
+            $total_earn = WalletHistory::where('wallet_id', $wallet->id)->where('is_deposite', 1)->sum('amount');
+            $total_withdraw = WalletHistory::where('wallet_id', $wallet->id)->where('is_expanse', 1)->sum('amount');
+        }
         if(count($categories) > 0) 
         {
             // print_r(json_decode(json_encode($categories), true)); exit;
@@ -344,13 +357,20 @@ class CategoryController extends Controller
                 'status'=> '1',
                 'categories'=> json_decode(json_encode($categories), true),
                 'image_base_url' => asset('images/'),
-                'currentRides' => $this->currentRidesList()
+                'currentRides' => $this->currentRidesList(),
+                'balance' => $balance,
+                'total_earn' => $total_earn,
+                'total_withdraw' => $total_withdraw,
             ]);
         } else {
             return response([
                 'status'=> '0',
                 'categories'=> [],
-                'currentRides' => $this->currentRidesList()
+                'currentRides' => $this->currentRidesList(),
+                'image_base_url' => asset('images/'),
+                'balance' => $balance,
+                'total_earn' => $total_earn,
+                'total_withdraw' => $total_withdraw,
             ], 404);
         }
     }

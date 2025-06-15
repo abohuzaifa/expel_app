@@ -17,6 +17,7 @@ use App\Http\Controllers\Admin\RequestController;
 use App\Http\Controllers\Admin\TripController;
 use App\Http\Controllers\Admin\WalletController;
 use App\Http\Controllers\Admin\NotificationApiController;
+use App\Http\Controllers\Admin\NotificationSettingController;
 use App\Http\Controllers\BannerController;
 use App\Http\Controllers\Location;
 
@@ -180,5 +181,8 @@ Route::group(["middleware"=> "auth:sanctum"], function () {
 
     Route::patch('/notifications/{id}/read', [NotificationApiController::class, 'markAsRead']);
     Route::patch('/notifications/read-all', [NotificationApiController::class, 'markAllAsRead']);
+
+    Route::get('/notification-settings', [NotificationSettingController::class, 'show']);
+    Route::post('/notification-settings', [NotificationSettingController::class, 'update']);
 
 });
