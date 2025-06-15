@@ -11,6 +11,7 @@ use App\Models\Wallet;
 use App\Models\CardDetail;
 use App\Models\Notification;
 use App\Models\Shop;
+use App\Models\UserNotificationSetting;
 use App\Rules\ValidMobileNumber;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -66,6 +67,11 @@ class AuthController extends Controller
             return response([
                 'users' => $user,
                 'token' => $user->createToken('secret')->plainTextToken,
+                'imageUrl' => $imageUrl ?? "",
+                'notifictionSettings' => UserNotificationSetting::firstOrCreate(
+                    ['user_id' => $user->id],
+                    UserNotificationSetting::getDefaultSettings()
+                )
             ]);
         } else {
             return response([
