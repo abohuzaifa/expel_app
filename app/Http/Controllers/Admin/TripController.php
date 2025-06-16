@@ -18,7 +18,7 @@ class TripController extends Controller
             'date' => 'required|date',
             'time' => 'required',
              'description' => 'nullable|string',
-             'price' => 'required|int'
+            //  'price' => 'required|int'
         ]);
         $user = auth()->user();
 
@@ -28,7 +28,7 @@ class TripController extends Controller
             'date' => $req->date,
             'time' => $req->time,
             'user_id' => $user->id,
-            'price' => $req->price,
+            'price' => $req->price ?? 0,
             'description' => $req->description
         ]);
 
