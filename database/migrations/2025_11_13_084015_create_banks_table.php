@@ -8,30 +8,23 @@ return new class extends Migration
 {
     /**
      * Run the migrations.
-     *
-     * @return void
      */
-    public function up()
+    public function up(): void
     {
-        //category table
-        Schema::create('shops', function (Blueprint $table) {
+        Schema::create('banks', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('name_ar')->nullable();
-            $table->string('logo')->nullable();
-            $table->integer('status')->default(1);
+            $table->string('branch_code')->nullable();
+            $table->boolean('status')->default(1);
             $table->timestamps();
         });
     }
 
     /**
      * Reverse the migrations.
-     *
-     * @return void
      */
-    public function down()
+    public function down(): void
     {
-        //
-        Schema::dropIfExists('shops');
+        Schema::dropIfExists('banks');
     }
 };

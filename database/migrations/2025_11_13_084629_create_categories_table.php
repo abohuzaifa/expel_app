@@ -6,32 +6,24 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
-    public function up()
+    public function up(): void
     {
-        //category table
         Schema::create('categories', function (Blueprint $table) {
             $table->id();
             $table->string('name');
             $table->string('name_ar')->nullable();
             $table->string('image')->nullable();
-            $table->integer('status')->default(1);
+            $table->unsignedBigInteger('created_by')->nullable();
+            $table->text('description')->nullable();
             $table->timestamps();
+
+            // Optional: foreign key
+            // $table->foreign('created_by')->references('id')->on('users')->onDelete('set null');
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
+    public function down(): void
     {
-        //
         Schema::dropIfExists('categories');
     }
 };
