@@ -224,6 +224,13 @@ return [
     'driver_vehicle_no' => 'Vehicle Number',
     'request_view' => 'Request View',
     'unpaid' => 'Unpaid',
-    
+    'contact_us' => 'Contact Us',
+'fill_form_contact' => 'Send us your message',
+'full_name' => 'Full Name',
+'email' => 'Email',
+'subject' => 'Subject',
+'message' => 'Message',
+'send_message' => 'Send Message',
+
 
 ];

@@ -202,6 +202,13 @@ return [
     'request' => 'Request',
     'request_list' => 'Request List',
     'request_tracking' => 'Request Tracking',
-    
+    'contact_us' => 'اتصل بنا',
+'fill_form_contact' => 'أرسل لنا رسالتك',
+'full_name' => 'الاسم الكامل',
+'email' => 'البريد الإلكتروني',
+'subject' => 'الموضوع',
+'message' => 'الرسالة',
+'send_message' => 'إرسال الرسالة',
+
 
 ];
