@@ -118,9 +118,9 @@ class HomeController extends Controller
     {
         $topSellers = DB::table('orders')
             ->select('seller_id', DB::raw('SUM(paid) as total_sales'))
-            ->whereDate('created_at', '>=', $startDate)
+            ->whereDate('created_at', '>=', $startDate->toDateString())
             ->groupBy('seller_id')
-            ->orderByDesc('paid')
+            ->orderByDesc('total_sales')
             ->limit(10)
             ->get();
 
