@@ -13,20 +13,23 @@ class NotificationSettingController extends Controller
     {
         $setting = UserNotificationSetting::firstOrCreate(
             ['user_id' => Auth::id()],
-            [] // defaults
+            UserNotificationSetting::getDefaultSettings()
         );
 
-        return response()->json($setting);
+        return response()->json([
+            'status' => 1,
+            'data' => $setting,
+        ]);
     }
 
     public function update(Request $request)
     {
-        $data = $request->only([
-            'trip_alert',
-            'new_offers',
-            'announcements',
-            'account_updates',
-            'messages',
+        $data = $request->validate([
+            'trip_alert' => 'sometimes|boolean',
+            'new_offers' => 'sometimes|boolean',
+            'announcements' => 'sometimes|boolean',
+            'account_updates' => 'sometimes|boolean',
+            'messages' => 'sometimes|boolean',
         ]);
 
         $setting = UserNotificationSetting::updateOrCreate(
@@ -35,6 +38,7 @@ class NotificationSettingController extends Controller
         );
 
         return response()->json([
+            'status' => 1,
             'message' => 'Notification settings updated successfully.',
             'data' => $setting
         ]);

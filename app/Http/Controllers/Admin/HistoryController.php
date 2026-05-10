@@ -39,59 +39,71 @@ class HistoryController extends Controller
         $request_user = User::find($request->user_id);
         if($req->is_start == 1 && $req->is_proceed == 1)
         {
-            $notification = new Notification();
-            $notification->user_id = $request->user_id; // Assuming the user is authenticated
-            $notification->message = $user->name.'('.$user->number_plate.') is going to collect your parcel.';
-            $notification->page = 'track_parcel';
-            $notification->save();
+            User::storeAppNotification(
+                $request->user_id,
+                $user->name.'('.$user->number_plate.') is going to collect your parcel.',
+                'track_parcel',
+                'trip_alert'
+            );
 
             $data = [];
             $data['title'] = 'Parcel Collection Status';
             $data['body'] = $user->name.' is going to collect your parcel.';
             $data['request_id'] = $req->request_id;
             $data['device_token'] = $request_user->device_token;
+            $data['user_id'] = $request_user->id;
+            $data['setting_key'] = 'trip_alert';
             $res = User::sendNotification($data);
         }
         else if($req->is_start == 1)
         {
-            $notification = new Notification();
-            $notification->user_id = $request->user_id; // Assuming the user is authenticated
-            $notification->message = $user->name.'('.$user->number_plate.') collected the parcel, your parcel on the way, click to track your parcel';
-            $notification->page = 'track_parcel';
-            $notification->save();
+            User::storeAppNotification(
+                $request->user_id,
+                $user->name.'('.$user->number_plate.') collected the parcel, your parcel on the way, click to track your parcel',
+                'track_parcel',
+                'trip_alert'
+            );
 
             $data = [];
             $data['title'] = 'Parcel Collected';
             $data['body'] = $user->name.' collected the parcel, your parcel on the way, click to track your parcel';
             $data['request_id'] = $req->request_id;
             $data['device_token'] = $request_user->device_token;
+            $data['user_id'] = $request_user->id;
+            $data['setting_key'] = 'trip_alert';
             $res = User::sendNotification($data);
         } else if($req->is_end == 1)
         {
-            $notification = new Notification();
-            $notification->user_id = $request->user_id; // Assuming the user is authenticated
-            $notification->message = 'Your parcel reched your destination, click to track your parcel';
-            $notification->page = 'track_parcel';
-            $notification->save();
+            User::storeAppNotification(
+                $request->user_id,
+                'Your parcel reched your destination, click to track your parcel',
+                'track_parcel',
+                'trip_alert'
+            );
 
             $data = [];
             $data['title'] = 'Parcel Delivered';
             $data['body'] = 'Your parcel reched your destination, click to track your parcel';
             $data['request_id'] = $req->request_id;
             $data['device_token'] = $request_user->device_token;
+            $data['user_id'] = $request_user->id;
+            $data['setting_key'] = 'trip_alert';
             $res = User::sendNotification($data);
         } else {
-            $notification = new Notification();
-            $notification->user_id = $request->user_id; // Assuming the user is authenticated
-            $notification->message = 'Your parcel on the way, click to track your parcel';
-            $notification->page = 'track_parcel';
-            $notification->save();
+            User::storeAppNotification(
+                $request->user_id,
+                'Your parcel on the way, click to track your parcel',
+                'track_parcel',
+                'trip_alert'
+            );
 
             $data = [];
             $data['title'] = 'Parcel Tracking';
             $data['body'] = 'Your parcel on the way, click to track your parcel';
             $data['request_id'] = $req->request_id;
             $data['device_token'] = $request_user->device_token;
+            $data['user_id'] = $request_user->id;
+            $data['setting_key'] = 'trip_alert';
             $res = User::sendNotification($data);
         }
         

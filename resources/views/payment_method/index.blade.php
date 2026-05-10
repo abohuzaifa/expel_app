@@ -33,6 +33,7 @@
  <tr>
    <th>{{trans('lang.number')}}</th>
    <th>{{trans('lang.name')}}</th>
+   <th>Name (AR)</th>
    <th>{{trans('lang.slug')}}</th>
    <th>{{trans('lang.status')}}</th>
    <th width="280px">{{trans('lang.action')}}</th>
@@ -47,17 +48,21 @@
   <tr>
     <td>{{ ++$i }}</td>
     <td>{{ $payment->name }}</td>
+     <td>{{ $payment->name_ar }}</td>
     <td>{{ $payment->slug }}</td>
     <td>
-       @if($payment->status == 0)
-       <a class="btn btn-warning text-center" href="{{ route('active',$payment->id) }}">{{trans('lang.deactive')}}</a>
-       @else
-       <a class="btn btn-success text-center" href="{{ route('inactive',$payment->id) }}">{{trans('lang.active')}}</a>
-       @endif
+       <span class="badge {{ $payment->status ? 'bg-success' : 'bg-secondary' }}">
+        {{ $payment->status ? trans('lang.active') : 'Inactive' }}
+       </span>
     </td>
     
     <td>
        <a class="btn btn-primary" href="{{ route('payment_method.edit',$payment->id) }}">{{trans('lang.edit')}}</a>   
+       @if($payment->status == 0)
+       <a class="btn btn-warning text-center" href="{{ route('active',$payment->id) }}">Activate</a>
+       @else
+       <a class="btn btn-secondary text-center" href="{{ route('inactive',$payment->id) }}">Deactivate</a>
+       @endif
        {!! Form::open(['method' => 'DELETE','route' => ['payment_method.destroy', $payment->id],'style'=>'display:inline']) !!}
             {!! Form::submit(trans('lang.delete'), ['class' => 'btn btn-danger']) !!}
         {!! Form::close() !!} 

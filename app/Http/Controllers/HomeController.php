@@ -39,8 +39,8 @@ class HomeController extends Controller
             // Get the current user
             $user = Auth::user();
 
-            // Check the user type condition (user type not equal to 0)
-            if ($user->user_type != 0) {
+            // Check the user type condition (only admin can access dashboard)
+            if ($user->user_type != 'admin' && $user->user_type != 0) {
                 // Log out the user
                 Auth::logout();
 

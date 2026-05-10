@@ -29,17 +29,20 @@ class OfferController extends Controller
         {
             $request = ModelsRequest::find($req->request_id);
             $user = User::find($request->user_id);
-                $notification = new Notification();
-                $notification->user_id = $request->user_id; // Assuming the user is authenticated
-                $notification->message = $driver->name.' add new offer againest your request';
-                $notification->page = 'request_page';
-                $notification->save();
+                User::storeAppNotification(
+                    $request->user_id,
+                    $driver->name.' add new offer againest your request',
+                    'request_page',
+                    'new_offers'
+                );
                 $data = [];
                 $data['title'] = 'New Offer';
                 $data['body'] = $driver->name.' add new offer againest your request';
                 $data['device_token'] = $user->device_token;
                 $data['request_id'] = $req->request_id;
                 $data['is_driver'] = 0;
+                $data['user_id'] = $user->id;
+                $data['setting_key'] = 'new_offers';
                 // print_r($user); print_r($driver->device_token);exit;
                 $res = User::sendNotification($data);
                 return response()->json([

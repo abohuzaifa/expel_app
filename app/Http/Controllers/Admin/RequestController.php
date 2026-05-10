@@ -75,11 +75,12 @@ class RequestController extends Controller
             //     $dd['code'] = $request->id;
             //     $res = receiverWhatsappAddress($dd);
             // }
-            $notification = new Notification();
-            $notification->user_id = auth()->user()->id; // Assuming the user is authenticated
-            $notification->message = 'Your Request created Successfully';
-            $notification->page = 'request_page';
-            $notification->save();
+            User::storeAppNotification(
+                auth()->id(),
+                'Your Request created Successfully',
+                'request_page',
+                'account_updates'
+            );
             $data = [];
             $data['title'] = 'New request';
             $data['body'] = 'A new request created in this region. Click here';
@@ -98,6 +99,8 @@ class RequestController extends Controller
                     // if($this->calculateDistanceAndTime($req->parcel_lat, $req->parcel_long, $driver->latitude, $driver->longitude) == true)
                     // {
                         $data['device_token'] = $driver->device_token;
+                        $data['user_id'] = $driver->id;
+                        $data['setting_key'] = 'trip_alert';
                         if($data['device_token'] && $data['device_token'] != ""){
                             User::sendNotification($data);
                         }
@@ -282,17 +285,20 @@ class RequestController extends Controller
                 {
                     $offer = Offer::find($req->offer_id);
                     $driver = User::find($offer->user_id);
-                    $notification = new Notification();
-                    $notification->user_id = $offer->user_id; // Assuming the user is authenticated
-                    $notification->message = 'Your offer accepted against the request ID : '.$req->request_id;
-                    $notification->page = 'request_page';
-                    $notification->save();
+                    User::storeAppNotification(
+                        $offer->user_id,
+                        'Your offer accepted against the request ID : '.$req->request_id,
+                        'request_page',
+                        'trip_alert'
+                    );
                     $data = [];
                     $data['title'] = 'Accept Offer';
                     $data['body'] = 'Your offer accepted against the request ID : '.$req->request_id;
                     $data['device_token'] = $driver->device_token;
                     $data['is_driver'] = 1;
                     $data['request_id'] = $req->request_id;
+                    $data['user_id'] = $driver->id;
+                    $data['setting_key'] = 'trip_alert';
                     $waba = [];
                     $user_req = ModelRequest::find($req->request_id);
                     if(empty($user_req->receiver_lat) || $user_req->receiver_lat == NULL){
@@ -333,17 +339,20 @@ class RequestController extends Controller
                     $offer = Offer::find($req->offer_id);
                     Offer::where('id', $req->offer_id)->update(['is_accept' => 1]);
                     $driver = User::find($offer->user_id);
-                    $notification = new Notification();
-                    $notification->user_id = $offer->user_id; // Assuming the user is authenticated
-                    $notification->message = 'Your offer accepted against the request ID : '.$req->request_id;
-                    $notification->page = 'request_page';
-                    $notification->save();
+                    User::storeAppNotification(
+                        $offer->user_id,
+                        'Your offer accepted against the request ID : '.$req->request_id,
+                        'request_page',
+                        'trip_alert'
+                    );
                     $data = [];
                     $data['title'] = 'Accept Offer';
                     $data['body'] = 'Your offer accepted against the request ID : '.$req->request_id;
                     $data['device_token'] = $driver->device_token;
                     $data['request_id'] = $req->request_id;
                     $data['is_driver'] = 1;
+                    $data['user_id'] = $driver->id;
+                    $data['setting_key'] = 'trip_alert';
                     
                     $res = User::sendNotification($data);
 
@@ -387,11 +396,12 @@ class RequestController extends Controller
                                     
                                     $offer = Offer::find($req->offer_id);
                                     $driver = User::find($offer->user_id);
-                                    $notification = new Notification();
-                                    $notification->user_id = $offer->user_id; // Assuming the user is authenticated
-                                    $notification->message = 'Your offer accepted against the request ID : '.$req->request_id;
-                                    $notification->page = 'request_page';
-                                    $notification->save();
+                                    User::storeAppNotification(
+                                        $offer->user_id,
+                                        'Your offer accepted against the request ID : '.$req->request_id,
+                                        'request_page',
+                                        'trip_alert'
+                                    );
                                     DB::commit();
                                     $data = [];
                                     $data['title'] = 'Accept Offer';
@@ -399,6 +409,8 @@ class RequestController extends Controller
                                     $data['device_token'] = $driver->device_token;
                                     $data['is_driver'] = 1;
                                     $data['request_id'] = $req->request_id;
+                                    $data['user_id'] = $driver->id;
+                                    $data['setting_key'] = 'trip_alert';
                                     $res = User::sendNotification($data);
                                     User::where('id', $driver->id)->update(['is_available' => 0]);
                                     return response()->json(['data' => [
@@ -483,6 +495,8 @@ class RequestController extends Controller
                             $data['device_token'] = $user->device_token;
                             $data['request_id'] = $request->id;
                             $data['is_driver'] = 1;
+                            $data['user_id'] = $user->id;
+                            $data['setting_key'] = 'account_updates';
                             
                             $res[] = User::sendNotification($data);
                             // print_r($res); exit;
@@ -495,6 +509,8 @@ class RequestController extends Controller
                             $data['device_token'] = $user->device_token;
                             $data['request_id'] = $request->id;
                             $data['is_driver'] = 0;
+                            $data['user_id'] = $user->id;
+                            $data['setting_key'] = 'trip_alert';
                             // echo "success";
                             $res[] = User::sendNotification($data);
                             User::where('id', $user->id)->update(['is_available' => 1]);
@@ -562,6 +578,8 @@ class RequestController extends Controller
                             $data['device_token'] = $user->device_token;
                             $data['request_id'] = $request->id;
                             $data['is_driver'] = 0;
+                            $data['user_id'] = $user->id;
+                            $data['setting_key'] = 'trip_alert';
                             
                             $res = User::sendNotification($data);
                             User::where('id', $user->id)->update(['is_available' => 1]);
@@ -608,6 +626,8 @@ class RequestController extends Controller
                             $data['device_token'] = $user->device_token;
                             $data['request_id'] = $request->id;
                             $data['is_driver'] = 1;
+                            $data['user_id'] = $user->id;
+                            $data['setting_key'] = 'account_updates';
                             
                             $res[] = User::sendNotification($data);
                         if($wallet_history)
@@ -619,6 +639,8 @@ class RequestController extends Controller
                             $data['device_token'] = $user->device_token;
                             $data['request_id'] = $request->id;
                             $data['is_driver'] = 0;
+                            $data['user_id'] = $user->id;
+                            $data['setting_key'] = 'trip_alert';
                             
                             $res[] = User::sendNotification($data);
                             User::where('id', $user->id)->update(['is_available' => 1]);

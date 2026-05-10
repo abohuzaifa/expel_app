@@ -48,17 +48,20 @@ class SuccessController extends Controller
                 ]);
                 send_message($wdata, $request->receiver_mobile);
                 $user = User::find($request->user_id);
-                $notification = new Notification();
-                $notification->user_id = $request->user_id; // Assuming the user is authenticated
-                $notification->message = 'Your Request payment done successfully';
-                $notification->page = 'request_page';
-                $notification->save();
+                User::storeAppNotification(
+                    $request->user_id,
+                    'Your Request payment done successfully',
+                    'request_page',
+                    'account_updates'
+                );
                 // $data = [];
                 $data['title'] = 'Payment';
                 $data['body'] = 'Your request payment done successfully';
                 $data['device_token'] = $user->device_token;
                 $data['is_driver'] = 0;
                 $data['request_id'] = $request->id;
+                $data['user_id'] = $user->id;
+                $data['setting_key'] = 'account_updates';
                 User::sendNotification($data);
             }
 

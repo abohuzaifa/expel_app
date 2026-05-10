@@ -318,7 +318,7 @@ class UserController extends Controller
     public function sellers_list()
     {
         $data['perPage'] = 10;
-        $data['sellers'] = DB::table('users')->where('user_type',1)->orderByDesc('id')->paginate($data['perPage']);
+        $data['sellers'] = DB::table('users')->where('user_type',2)->orderByDesc('id')->paginate($data['perPage']);
         return view('users.sellers_list', $data);
     }
 
@@ -332,6 +332,72 @@ class UserController extends Controller
         $user = User::find($id)->update(['status'=>0]);
         return redirect()->back()->with('success', trans('lang.status_deactive_success'));
     }
+
+    public function bankAccounts($id)
+    {
+        $user = User::findOrFail($id);
+        $bankAccounts = $user->bankAccounts()
+            ->with('bank')
+            ->get()
+            ->map(function ($account) {
+                return [
+                    'id' => $account->id,
+                    'bank_id' => $account->bank_id,
+                    'bank_name' => $account->bank->name ?? 'N/A',
+                    'account_holder_name' => $account->account_holder_name,
+                    'account_number' => $account->maskAccountNumber(),
+                    'account_number_full' => $account->account_number,
+                    'branch_code' => $account->branch_code,
+                    'iban' => $account->iban,
+                    'verification_status' => $account->verification_status,
+                    'verified_at' => $account->verified_at,
+                    'verified_by' => $account->verified_by,
+                    'verification_notes' => $account->verification_notes,
+                    'is_primary' => $account->is_primary,
+                    'created_at' => $account->created_at,
+                ];
+            });
+
+        return view('users.bank-accounts', compact('user', 'bankAccounts'));
+    }
+
+    public function verifyBankAccount($id, Request $request)
+    {
+        $bankAccount = \App\Models\BankAccount::findOrFail($id);
+
+        $data = $request->validate([
+            'verification_status' => 'required|in:verified,rejected',
+            'verification_notes' => 'required|string|max:500',
+        ]);
+
+        if ($bankAccount->verification_status !== 'pending') {
+            return redirect()->back()
+                ->with('error', 'Only pending bank accounts can be verified.');
+        }
+
+        $bankAccount->update([
+            'verification_status' => $data['verification_status'],
+            'verification_notes' => $data['verification_notes'],
+            'verified_by' => auth()->id(),
+            'verified_at' => now(),
+        ]);
+
+        // Notify user about verification result
+        $message = $data['verification_status'] === 'verified'
+            ? 'Your bank account has been verified successfully.'
+            : 'Your bank account verification has been rejected.';
+
+        \App\Models\User::storeAppNotification(
+            $bankAccount->user_id,
+            $message,
+            'bank_accounts',
+            'account_updates'
+        );
+
+        return redirect()->back()
+            ->with('success', 'Bank account ' . $data['verification_status'] . ' successfully.');
+    }
+
     public function change_password(Request $request, $id)
     {
 

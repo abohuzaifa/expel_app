@@ -76,6 +76,11 @@
             <i class="bi bi-circle"></i><span>{{trans('lang.user_create')}}</span>
           </a>
         </li>
+        <li>
+          <a href="{{ route('drivers.verifications.index') }}">
+            <i class="bi bi-circle"></i><span>Driver Verification</span>
+          </a>
+        </li>
       </ul>
     </li>
 
@@ -106,6 +111,11 @@
         <li>
           <a href="{{route('payment_method.index')}}">
             <i class="bi bi-circle"></i><span>{{trans('lang.payment_method')}}</span>
+          </a>
+        </li>
+        <li>
+          <a href="{{route('banks.index')}}">
+            <i class="bi bi-circle"></i><span>Banks Management</span>
           </a>
         </li>
       </ul>

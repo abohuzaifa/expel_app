@@ -3,48 +3,46 @@
 namespace App\Http\Controllers;
 
 use App\Models\PaymentMethod as ModelsPaymentMethod;
-use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class PaymentMethod extends Controller
 {
-    //
     public function index()
     {
         $data['perPage'] = 10;
-        $data['payments'] = DB::table('payment_methods')->orderByDesc('id')->paginate($data['perPage']);
+        $data['payments'] = ModelsPaymentMethod::orderByDesc('id')->paginate($data['perPage']);
         return view('payment_method.index', $data);
     }
+
     public function edit($id)
     {
-        $payment = ModelsPaymentMethod::find($id);
-        // $user = User::find($wallet->id);
+        $payment = ModelsPaymentMethod::findOrFail($id);
         return view('payment_method.edit', compact('payment'));
     }
 
     public function update($id, Request $request, ModelsPaymentMethod $payment)
     {
-        $data = $_POST;
-        // echo $id; exit;
-        // check if product name already exists
-        $value = DB::select("SELECT * FROM payment_methods WHERE slug=:slug AND id != :id", [':slug' => $data['slug'], ':id' => $id]);
-        if(!empty($value))
-        {
-            return redirect()->route('payment_method.create')->with('error', trans('lang.slug_already_exist'));
-        }
+        $payment = ModelsPaymentMethod::findOrFail($id);
 
-    
-            $payment = DB::table('payment_methods')->where('id', '=', $id)->update([
-                'slug' => $request->input('slug'),
-                'name' => $request->input('name'),
-                'public_key' => $request->input('public_key'),
-                'secret_key' => $request->input('secret_key'),
-            ]);
-    
-            // $product->save();
-            return redirect()->route('payment_method.index')->with('success', trans('lang.update_message'));
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:255', Rule::unique('payment_methods', 'name')->ignore($payment->id)],
+            'name_ar' => ['nullable', 'string', 'max:255'],
+            'slug' => ['required', 'string', 'max:255', Rule::unique('payment_methods', 'slug')->ignore($payment->id)],
+            'public_key' => ['nullable', 'string', 'max:255'],
+            'secret_key' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $payment->update([
+            'slug' => $data['slug'],
+            'name' => $data['name'],
+            'name_ar' => $data['name_ar'] ?? $data['name'],
+            'public_key' => $data['public_key'] ?? null,
+            'secret_key' => $data['secret_key'] ?? null,
+        ]);
+
+        return redirect()->route('payment_method.index')->with('success', trans('lang.update_message'));
     }
 
     public function active($id)
@@ -76,28 +74,25 @@ class PaymentMethod extends Controller
      */
     public function store(Request $request)
     {
-        // print_r($_POST); exit;
-        $data = $_POST;
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:255', 'unique:payment_methods,name'],
+            'name_ar' => ['nullable', 'string', 'max:255'],
+            'slug' => ['required', 'string', 'max:255', 'unique:payment_methods,slug'],
+            'public_key' => ['nullable', 'string', 'max:255'],
+            'secret_key' => ['nullable', 'string', 'max:255'],
+        ]);
 
-        // check if product name already exists
-        $payment = DB::select("SELECT * FROM payment_methods WHERE slug=:slug", [':slug' => $data['slug']]);
-        if(!empty($payment))
-        {
-            return redirect()->route('payment_method.create')->with('error', trans('lang.slug_already_exist'));
-        }
+        ModelsPaymentMethod::create([
+            'slug' => $data['slug'],
+            'name' => $data['name'],
+            'name_ar' => $data['name_ar'] ?? $data['name'],
+            'public_key' => $data['public_key'] ?? null,
+            'secret_key' => $data['secret_key'] ?? null,
+            'created_by' => Auth::id(),
+            'status' => 1,
+        ]);
 
-    
-            $payment = ModelsPaymentMethod::create([
-                'slug' => $request->input('slug'),
-                'name' => $request->input('name'),
-                'public_key' => $request->input('public_key'),
-                'secret_key' => $request->input('secret_key'),
-                'created_by' => Auth::user()->id,
-                'status' =>1,
-            ]);
-    
-            // $product->save();
-            return redirect()->route('payment_method.index')->with('success', trans('lang.create_message'));
+        return redirect()->route('payment_method.index')->with('success', trans('lang.create_message'));
 
 
     }
@@ -108,9 +103,9 @@ class PaymentMethod extends Controller
      * @param  \App\Models\Product  $product
      * @return \Illuminate\Http\Response
      */
-    public function show(Product $product)
+    public function show($id)
     {
-        //
+        return redirect()->route('payment_method.edit', $id);
     }
 
 
@@ -122,8 +117,7 @@ class PaymentMethod extends Controller
      */
     public function destroy($id,ModelsPaymentMethod $payment)
     {
-    //    echo "<pre>"; print_r($id); exit;
-        $payment = ModelsPaymentMethod::find($id);
+        $payment = ModelsPaymentMethod::findOrFail($id);
         $payment->delete();
 
         return redirect()->route('payment_method.index')->with('success', trans('lang.delete_message'));

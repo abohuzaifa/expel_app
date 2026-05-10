@@ -3,7 +3,7 @@
 
 @section('content')
 <div class="pagetitle">
-  <h1>{{trans("lang.user_list")}}</h1>
+  <h1>Drivers List</h1>
   <nav>
     <ol class="breadcrumb">
       <li class="breadcrumb-item"><a href="index.html">{{trans("lang.home")}}</a></li>
@@ -35,6 +35,7 @@
    <th>{{trans("lang.name")}}</th>
    <th>{{trans("lang.email")}}</th>
    <th>{{trans("lang.mobile")}}</th>
+   <th>Verification</th>
    <th width="280px">{{trans("lang.action")}}</th>
  </tr>
  @php
@@ -51,12 +52,18 @@
         {{ $user->mobile }}
     </td>
     <td class="text-center">
+      @php $status = $user->verification_status ?? 'pending'; @endphp
+      <span class="badge {{ $status === 'verified' ? 'bg-success' : ($status === 'rejected' ? 'bg-danger' : 'bg-warning text-dark') }}">
+        {{ ucfirst($status) }}
+      </span>
+    </td>
+    <td class="text-center">
         @if($user->status == 0)
-       <a class="btn btn-warning text-center" href="{{ route('sellers_active',$user->id) }}">{{trans("lang.deactive")}}</a>
+       <a class="btn btn-warning text-center" href="{{ route('sellers_active',$user->id) }}">Activate</a>
        @else
-       <a class="btn btn-success text-center" href="{{ route('sellers_inactive',$user->id) }}">{{trans("lang.active")}}</a>
+       <a class="btn btn-secondary text-center" href="{{ route('sellers_inactive',$user->id) }}">Deactivate</a>
        @endif
-
+       <a class="btn btn-info text-center" href="{{ route('drivers.verifications.show', $user->id) }}">Review</a>
 
     </td>
   </tr>

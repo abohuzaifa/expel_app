@@ -27,14 +27,33 @@ class User extends Authenticatable
         'password',
         'status',
         'address',
+        'street_address',
+        'city',
+        'state',
+        'postal_code',
+        'latitude',
+        'longitude',
         'country',
         'otp',
         'category_id',
+        'number_plate',
         'driving_license',
+        'driving_license_image',
+        'vehicle_registration_image',
         'bank_id',
         'bank_account',
+        'iban',
         'device_token',
-        'is_available'
+        'is_available',
+        'twitter',
+        'facebook',
+        'instagram',
+        'linkedin',
+        'is_read',
+        'verification_status',
+        'verification_notes',
+        'verified_by',
+        'verified_at',
     ];
 
     /**
@@ -55,6 +74,10 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'status' => 'boolean',
+        'is_available' => 'boolean',
+        'is_read' => 'boolean',
+        'verified_at' => 'datetime',
     ];
 
     public function orders()
@@ -66,8 +89,85 @@ class User extends Authenticatable
         return $this->hasMany(Notification::class);
     }
 
+    public function notificationSetting()
+    {
+        return $this->hasOne(UserNotificationSetting::class);
+    }
+
+    public function bankAccounts()
+    {
+        return $this->hasMany(BankAccount::class);
+    }
+
+    public function isAdmin(): bool
+    {
+        return (int) $this->user_type === 0;
+    }
+
+    public function isCustomer(): bool
+    {
+        return (int) $this->user_type === 1;
+    }
+
+    public function isDriver(): bool
+    {
+        return (int) $this->user_type === 2;
+    }
+
+    public static function roleLabel($userType): string
+    {
+        return match ((int) $userType) {
+            0 => 'ADMIN',
+            2 => 'DRIVER',
+            default => 'USER',
+        };
+    }
+
+    public static function notificationEnabled(?int $userId, ?string $settingKey = null): bool
+    {
+        if (!$userId || !$settingKey) {
+            return true;
+        }
+
+        $setting = UserNotificationSetting::firstOrCreate(
+            ['user_id' => $userId],
+            UserNotificationSetting::getDefaultSettings()
+        );
+
+        return (bool) $setting->getAttribute($settingKey);
+    }
+
+    public static function storeAppNotification(int $userId, string $message, string $page, ?string $settingKey = null): ?Notification
+    {
+        if (!self::notificationEnabled($userId, $settingKey)) {
+            return null;
+        }
+
+        return Notification::create([
+            'user_id' => $userId,
+            'message' => $message,
+            'page' => $page,
+        ]);
+    }
+
     public static function sendNotification($data)
     {
+        if (!empty($data['user_id']) && !self::notificationEnabled((int) $data['user_id'], $data['setting_key'] ?? null)) {
+            return [
+                'success' => true,
+                'skipped' => true,
+                'reason' => 'notification disabled by user settings',
+            ];
+        }
+
+        if (empty($data['device_token'])) {
+            return [
+                'success' => false,
+                'skipped' => true,
+                'reason' => 'device token missing',
+            ];
+        }
+
         // $deviceToken = $data['device_token'];
         // $title = $data['title'];
         // $body = $data['body'];

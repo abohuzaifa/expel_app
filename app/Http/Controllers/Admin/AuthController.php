@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use App\Models\Wallet;
 use App\Models\CardDetail;
+use App\Models\BankAccount;
 use App\Models\Notification;
 use App\Models\Shop;
 use App\Models\UserNotificationSetting;
@@ -86,40 +87,86 @@ class AuthController extends Controller
         $banks = Bank::where('status', 1)->get();
         return response()->json(['banks' => $banks]);
     }
+
     public function updateVehicle(Request $req)
     {
         $attrs = $req->validate([
-            'number_plate' => 'required',
-            'vehicle_type' => 'required|int',
-            'driving_license' => 'required',
+            'number_plate' => 'required|string|max:100',
+            'vehicle_type' => 'required|integer',
+            'driving_license' => 'required|string|max:100',
+            'driving_license_image' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:10240',
+            'vehicle_registration_image' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:10240',
         ]);
 
-        $update = DB::table('users')->where('id', auth()->user()->id)->update([
-            'number_plate' => $req->number_plate,
-            'category_id' => $req->vehicle_type,
-            'driving_license' => $req->driving_license,
-        ]);
+        $user = auth()->user();
 
-        return response()->json(['success' => 'success']);
+        if (!$user || (int) $user->user_type !== 2) {
+            return response()->json([
+                'status' => 0,
+                'message' => 'Only drivers can update vehicle settings.',
+            ], 403);
+        }
+
+        $drivingLicenseImage = $this->uploadDocument($req, 'driving_license_image', $user->driving_license_image);
+        $vehicleRegistrationImage = $this->uploadDocument($req, 'vehicle_registration_image', $user->vehicle_registration_image);
+
+        $requiresReverification = $user->number_plate !== $attrs['number_plate']
+            || (int) $user->category_id !== (int) $attrs['vehicle_type']
+            || $user->driving_license !== $attrs['driving_license']
+            || $req->hasFile('driving_license_image')
+            || $req->hasFile('vehicle_registration_image');
+
+        $payload = [
+            'number_plate' => $attrs['number_plate'],
+            'category_id' => $attrs['vehicle_type'],
+            'driving_license' => $attrs['driving_license'],
+            'driving_license_image' => $drivingLicenseImage,
+            'vehicle_registration_image' => $vehicleRegistrationImage,
+        ];
+
+        if ($requiresReverification) {
+            $payload['verification_status'] = 'pending';
+            $payload['verification_notes'] = null;
+            $payload['verified_by'] = null;
+            $payload['verified_at'] = null;
+        }
+
+        User::where('id', $user->id)->update($payload);
+
+        $updatedUser = User::find($user->id);
+
+        return response()->json([
+            'status' => 1,
+            'message' => 'Vehicle settings updated successfully.',
+            'vehicle' => $this->vehiclePayload($updatedUser),
+        ]);
     }
+
     public function createDriver(Request $req)
     {
         $attrs = $req->validate([
             "name"=> "required|string",
-            // "email"=> "required|email|unique:users,email",
+            'email' => 'nullable|email|unique:users,email',
             "password"=> "required|min:6|confirmed",
             'mobile' => 'required|unique:users',
             'user_type'=> 'required|int',
             'vehicle_type' => 'required|int',
-            // 'driving_license' => 'required',
-            // 'bank_id' => 'required|int',
-            // 'bank_account' => 'required',
-
+            'number_plate' => 'nullable|string|max:100',
+            'driving_license' => 'nullable|string|max:100',
+            'bank_id' => 'nullable|integer',
+            'bank_account' => 'nullable|string|max:100',
+            'iban' => 'nullable|string|max:100',
+            'driving_license_image' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:10240',
+            'vehicle_registration_image' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:10240',
         ]);
+
         $randomNumber = rand(100000, 999999);
+        $drivingLicenseImage = $this->uploadDocument($req, 'driving_license_image');
+        $vehicleRegistrationImage = $this->uploadDocument($req, 'vehicle_registration_image');
+
         $user = User::create([
             "name"=> $attrs["name"],
-            "email"=> $req->email,
+            "email"=> $attrs['email'] ?? null,
             "mobile" => $attrs["mobile"],
             "user_type" => $attrs['user_type'],
             "password"=> bcrypt($attrs["password"]),
@@ -127,25 +174,29 @@ class AuthController extends Controller
             "street_address" => $req->address,
             "status"=> 1,
             "category_id" => $req->vehicle_type,
+            'number_plate' => $req->number_plate,
             "driving_license" => $req->driving_license ?? "",
+            'driving_license_image' => $drivingLicenseImage,
+            'vehicle_registration_image' => $vehicleRegistrationImage,
             "bank_id" => $req->bank_id ?? 0,
             "bank_account" => $req->bank_account,
             "name_ar" => $req->name_ar,
-            'iban' => $req->iban
+            'iban' => $req->iban,
+            'verification_status' => 'pending',
         ]);
+
         if($user)
         {
             Wallet::create([
                 'user_id' => $user->id
             ]);
-            $notification = new Notification();
-            $notification->user_id = $user->id; // Assuming the user is authenticated
-            $notification->message = 'Your account registered Successfully';
-            $notification->page = 'profile';
-            $notification->save();
+
+            User::storeAppNotification($user->id, 'Your account registered Successfully', 'profile', 'account_updates');
+
             return response([
                 'users' => $user,
                 'token' => $user->createToken('secret')->plainTextToken,
+                'vehicle' => $this->vehiclePayload($user),
             ]);
         } else {
             return response([
@@ -361,7 +412,7 @@ class AuthController extends Controller
           ]);
               // return redirect()->route("")->with("success","");
               return response([
-                  'user' => auth()->user(),
+                  'user' => User::find(auth()->user()->id),
                   'token' => auth()->user()->createToken('secret')->plainTextToken,
                   'notifictionSettings' => UserNotificationSetting::firstOrCreate(
                         ['user_id' => $user->id],
@@ -561,6 +612,106 @@ class AuthController extends Controller
             ],200);
         }
     }
+
+    public function vehicleSettings()
+    {
+        $user = auth()->user();
+
+        if (!$user || (int) $user->user_type !== 2) {
+            return response()->json([
+                'status' => 0,
+                'message' => 'Only drivers have vehicle settings.',
+            ], 403);
+        }
+
+        return response()->json([
+            'status' => 1,
+            'vehicle' => $this->vehiclePayload($user),
+        ]);
+    }
+
+    public function contactDetails()
+    {
+        $user = auth()->user();
+        $card = CardDetail::where('user_id', $user->id)->latest()->first();
+
+        $addressParts = array_filter([
+            $user->street_address ?: $user->address,
+            $user->city,
+            $user->state,
+            $user->country,
+            $user->postal_code,
+        ]);
+
+        return response()->json([
+            'status' => 1,
+            'data' => [
+                'name' => $user->name,
+                'email' => $user->email,
+                'mobile' => $user->mobile,
+                'address' => [
+                    'street_address' => $user->street_address ?: $user->address,
+                    'city' => $user->city,
+                    'state' => $user->state,
+                    'country' => $user->country,
+                    'postal_code' => $user->postal_code,
+                    'full_address' => implode(', ', $addressParts),
+                ],
+                'payment_method' => $card ? $this->serializeCard($card) : null,
+                'profile_image_url' => !empty($user->image) ? asset('images/' . $user->image) : null,
+            ],
+        ]);
+    }
+
+    protected function uploadDocument(Request $request, string $field, ?string $currentFile = null): ?string
+    {
+        if (!$request->hasFile($field) || !$request->file($field)->isValid()) {
+            return $currentFile;
+        }
+
+        if ($currentFile) {
+            removeImages($currentFile);
+        }
+
+        $file = $request->file($field);
+        $fileName = uniqid($field . '_', true) . '.' . $file->getClientOriginalExtension();
+        $file->move(public_path('images'), $fileName);
+
+        return $fileName;
+    }
+
+    protected function vehiclePayload(User $user): array
+    {
+        return [
+            'vehicle_type' => $user->category_id,
+            'number_plate' => $user->number_plate,
+            'driving_license' => $user->driving_license,
+            'driving_license_image' => $user->driving_license_image,
+            'driving_license_image_url' => $user->driving_license_image ? asset('images/' . $user->driving_license_image) : null,
+            'vehicle_registration_image' => $user->vehicle_registration_image,
+            'vehicle_registration_image_url' => $user->vehicle_registration_image ? asset('images/' . $user->vehicle_registration_image) : null,
+            'bank_id' => $user->bank_id,
+            'bank_account' => $user->bank_account,
+            'iban' => $user->iban,
+            'verification_status' => $user->verification_status ?? 'pending',
+            'verification_notes' => $user->verification_notes,
+            'verified_at' => $user->verified_at,
+            'is_verified' => ($user->verification_status ?? 'pending') === 'verified',
+        ];
+    }
+
+    protected function serializeCard(CardDetail $card): array
+    {
+        return [
+            'id' => $card->id,
+            'card_number' => str_repeat('*', max(strlen($card->card_number) - 4, 0)) . substr($card->card_number, -4),
+            'last_four' => substr($card->card_number, -4),
+            'month' => $card->month,
+            'year' => $card->year,
+            'expiry' => sprintf('%02d/%s', (int) $card->month, $card->year),
+        ];
+    }
+
     public function updateProfileImage($id, Request $req)
     {
         $file_name = "";
@@ -585,20 +736,51 @@ class AuthController extends Controller
         }
     }
 
+    public function cardDetails()
+    {
+        $cards = CardDetail::where('user_id', auth()->id())
+            ->latest()
+            ->get()
+            ->map(fn (CardDetail $card) => $this->serializeCard($card))
+            ->values();
+
+        return response([
+            'status' => 1,
+            'cards' => $cards,
+        ]);
+    }
+
+    public function showCardDetail($id)
+    {
+        $card = CardDetail::where('user_id', auth()->id())->find($id);
+
+        if (!$card) {
+            return response([
+                'status' => 0,
+                'message' => 'Card detail not found.',
+            ], 404);
+        }
+
+        return response([
+            'status' => 1,
+            'card' => $this->serializeCard($card),
+        ]);
+    }
+
     public function cardDetail(Request $req)
     {
         $data = $req->validate([
-            'card_number' => "required",
-            "cvv" => "required|int",
-            "month" => "required|int",
-            "year" => "required|int",
+            'card_number' => 'required|digits_between:12,19',
+            'cvv' => 'required|digits_between:3,4',
+            'month' => 'required|integer|between:1,12',
+            'year' => 'required|digits:4',
         ]);
 
         $card_data = CardDetail::create([
             'card_number' => $data['card_number'],
-            "cvv" => $data['cvv'],
-            "month" => $data['month'],
-            "year" => $data['year'],
+            'cvv' => $data['cvv'],
+            'month' => sprintf('%02d', (int) $data['month']),
+            'year' => $data['year'],
             "user_id" => auth()->user()->id
         ]);
 
@@ -606,7 +788,7 @@ class AuthController extends Controller
         {
             return response([
                 'status' => 1,
-                "card" => json_decode(json_encode($card_data), true)
+                'card' => $this->serializeCard($card_data)
             ]);
         } else {
             return response([
@@ -619,49 +801,446 @@ class AuthController extends Controller
     public function cardDetailUpdate($id,Request $req)
     {
         $data = $req->validate([
-            'card_number' => "required",
-            "cvv" => "required|int",
-            "month" => "required|int",
-            "year" => "required|int",
+            'card_number' => 'required|digits_between:12,19',
+            'cvv' => 'required|digits_between:3,4',
+            'month' => 'required|integer|between:1,12',
+            'year' => 'required|digits:4',
         ]);
 
-        $card_data = CardDetail::where('id',$id)->update([
-            'card_number' => $data['card_number'],
-            "cvv" => $data['cvv'],
-            "month" => $data['month'],
-            "year" => $data['year'],
-        ]);
+        $card = CardDetail::where('user_id', auth()->id())->find($id);
 
-        if($card_data)
-        {
-            return response([
-                'status' => 1,
-                "message" => "Update Successfully."
-            ]);
-        } else {
+        if (!$card) {
             return response([
                 'status' => 0,
-                "message" => "Something went wrong."
-            ]);
+                'message' => 'Card detail not found.',
+            ], 404);
         }
+
+        $card->update([
+            'card_number' => $data['card_number'],
+            'cvv' => $data['cvv'],
+            'month' => sprintf('%02d', (int) $data['month']),
+            'year' => $data['year'],
+        ]);
+
+        return response([
+            'status' => 1,
+            'message' => 'Update Successfully.',
+            'card' => $this->serializeCard($card->fresh()),
+        ]);
     }
 
     public function deleteCardDetails($id)
     {
-        $card = CardDetail::find( $id );
-        
-            if($card->delete())
-            {
-                return response([
-                    'status'=> '1',
-                    'message' => "Card detail delete successfully."
-                ], 200);
-            }else if($card) {
-                return response([
-                    "status"=> "0",
-                    "message"=> "Some thing went wrong."
-                ],200);
-            }
+        $card = CardDetail::where('user_id', auth()->id())->find($id);
+
+        if (!$card) {
+            return response([
+                'status' => '0',
+                'message' => 'Card detail not found.',
+            ], 404);
+        }
+
+        if($card->delete())
+        {
+            return response([
+                'status'=> '1',
+                'message' => 'Card detail delete successfully.'
+            ], 200);
+        }
+
+        return response([
+            'status'=> '0',
+            'message'=> 'Some thing went wrong.'
+        ],200);
+    }
+
+    // Bank Account Management APIs
+    public function bankAccounts()
+    {
+        $bankAccounts = auth()->user()->bankAccounts()
+            ->with('bank')
+            ->get()
+            ->map(function ($account) {
+                return [
+                    'id' => $account->id,
+                    'bank_id' => $account->bank_id,
+                    'bank_name' => $account->bank->name ?? null,
+                    'account_holder_name' => $account->account_holder_name,
+                    'account_number' => $account->maskAccountNumber(),
+                    'account_number_full' => $account->account_number,
+                    'branch_code' => $account->branch_code,
+                    'iban' => $account->iban,
+                    'verification_status' => $account->verification_status,
+                    'is_primary' => $account->is_primary,
+                    'verified_at' => $account->verified_at,
+                ];
+            });
+
+        return response([
+            'status' => 1,
+            'bank_accounts' => $bankAccounts,
+        ]);
+    }
+
+    public function addBankAccount(Request $req)
+    {
+        $data = $req->validate([
+            'bank_id' => 'required|exists:banks,id',
+            'account_holder_name' => 'required|string|max:255',
+            'account_number' => 'required|string|max:50',
+            'branch_code' => 'nullable|string|max:255',
+            'iban' => 'nullable|string|max:255',
+        ]);
+
+        $user = auth()->user();
+
+        // Check if user already has 5 bank accounts
+        $accountCount = BankAccount::where('user_id', $user->id)->count();
+        if ($accountCount >= 5) {
+            return response([
+                'status' => 0,
+                'message' => 'Maximum 5 bank accounts allowed.',
+            ], 422);
+        }
+
+        $bankAccount = BankAccount::create([
+            'user_id' => $user->id,
+            'bank_id' => $data['bank_id'],
+            'account_holder_name' => $data['account_holder_name'],
+            'account_number' => $data['account_number'],
+            'branch_code' => $data['branch_code'],
+            'iban' => $data['iban'],
+            'verification_status' => 'pending',
+        ]);
+
+        // Notify admin about new bank account submission
+        User::storeAppNotification(
+            $user->id,
+            "Your bank account has been submitted for verification",
+            'bank_accounts',
+            'account_updates'
+        );
+
+        return response([
+            'status' => 1,
+            'message' => 'Bank account added successfully.',
+            'bank_account' => [
+                'id' => $bankAccount->id,
+                'bank_id' => $bankAccount->bank_id,
+                'account_holder_name' => $bankAccount->account_holder_name,
+                'account_number' => $bankAccount->maskAccountNumber(),
+                'branch_code' => $bankAccount->branch_code,
+                'iban' => $bankAccount->iban,
+                'verification_status' => $bankAccount->verification_status,
+            ],
+        ], 201);
+    }
+
+    public function updateBankAccount($id, Request $req)
+    {
+        $bankAccount = BankAccount::where('user_id', auth()->id())->find($id);
+
+        if (!$bankAccount) {
+            return response([
+                'status' => 0,
+                'message' => 'Bank account not found.',
+            ], 404);
+        }
+
+        // Only allow update if not yet verified
+        if ($bankAccount->verification_status !== 'pending') {
+            return response([
+                'status' => 0,
+                'message' => 'Only pending bank accounts can be updated.',
+            ], 422);
+        }
+
+        $data = $req->validate([
+            'account_holder_name' => 'required|string|max:255',
+            'account_number' => 'required|string|max:50',
+            'branch_code' => 'nullable|string|max:255',
+            'iban' => 'nullable|string|max:255',
+        ]);
+
+        $bankAccount->update([
+            'account_holder_name' => $data['account_holder_name'],
+            'account_number' => $data['account_number'],
+            'branch_code' => $data['branch_code'],
+            'iban' => $data['iban'],
+        ]);
+
+        return response([
+            'status' => 1,
+            'message' => 'Bank account updated successfully.',
+            'bank_account' => [
+                'id' => $bankAccount->id,
+                'bank_id' => $bankAccount->bank_id,
+                'account_holder_name' => $bankAccount->account_holder_name,
+                'account_number' => $bankAccount->maskAccountNumber(),
+                'branch_code' => $bankAccount->branch_code,
+                'iban' => $bankAccount->iban,
+                'verification_status' => $bankAccount->verification_status,
+            ],
+        ]);
+    }
+
+    public function deleteBankAccount($id)
+    {
+        $bankAccount = BankAccount::where('user_id', auth()->id())->find($id);
+
+        if (!$bankAccount) {
+            return response([
+                'status' => 0,
+                'message' => 'Bank account not found.',
+            ], 404);
+        }
+
+        // Only allow delete if not verified
+        if ($bankAccount->verification_status === 'verified') {
+            return response([
+                'status' => 0,
+                'message' => 'Cannot delete a verified bank account.',
+            ], 422);
+        }
+
+        if ($bankAccount->delete()) {
+            return response([
+                'status' => 1,
+                'message' => 'Bank account deleted successfully.',
+            ]);
+        }
+
+        return response([
+            'status' => 0,
+            'message' => 'Something went wrong.',
+        ], 500);
+    }
+
+    public function showBankAccount($id)
+    {
+        $bankAccount = BankAccount::where('user_id', auth()->id())
+            ->with('bank')
+            ->find($id);
+
+        if (!$bankAccount) {
+            return response([
+                'status' => 0,
+                'message' => 'Bank account not found.',
+            ], 404);
+        }
+
+        return response([
+            'status' => 1,
+            'bank_account' => [
+                'id' => $bankAccount->id,
+                'bank_id' => $bankAccount->bank_id,
+                'bank_name' => $bankAccount->bank->name ?? null,
+                'account_holder_name' => $bankAccount->account_holder_name,
+                'account_number' => $bankAccount->maskAccountNumber(),
+                'account_number_full' => $bankAccount->account_number,
+                'branch_code' => $bankAccount->branch_code,
+                'iban' => $bankAccount->iban,
+                'verification_status' => $bankAccount->verification_status,
+                'is_primary' => $bankAccount->is_primary,
+                'verified_at' => $bankAccount->verified_at,
+            ],
+        ]);
+    }
+
+    public function setPrimaryBankAccount($id)
+    {
+        $bankAccount = BankAccount::where('user_id', auth()->id())->find($id);
+
+        if (!$bankAccount) {
+            return response([
+                'status' => 0,
+                'message' => 'Bank account not found.',
+            ], 404);
+        }
+
+        if ($bankAccount->verification_status !== 'verified') {
+            return response([
+                'status' => 0,
+                'message' => 'Only verified bank accounts can be set as primary.',
+            ], 422);
+        }
+
+        // Remove primary flag from all other accounts
+        BankAccount::where('user_id', auth()->id())
+            ->where('id', '!=', $id)
+            ->update(['is_primary' => false]);
+
+        // Set this account as primary
+        $bankAccount->update(['is_primary' => true]);
+
+        return response([
+            'status' => 1,
+            'message' => 'Primary bank account set successfully.',
+        ]);
+    }
+
+    // Admin Bank Account Verification APIs
+    public function adminBankAccounts(Request $req)
+    {
+        // Only admins can access this
+        if (!auth()->user()->isAdmin()) {
+            return response([
+                'status' => 0,
+                'message' => 'Unauthorized access.',
+            ], 403);
+        }
+
+        $query = BankAccount::with(['user', 'bank']);
+
+        // Filter by status
+        if ($req->has('status')) {
+            $query->where('verification_status', $req->status);
+        }
+
+        // Filter by user type
+        if ($req->has('user_type')) {
+            $query->whereHas('user', function ($q) use ($req) {
+                $q->where('user_type', $req->user_type);
+            });
+        }
+
+        $bankAccounts = $query->paginate(20);
+
+        return response([
+            'status' => 1,
+            'bank_accounts' => $bankAccounts->map(function ($account) {
+                return [
+                    'id' => $account->id,
+                    'user_id' => $account->user_id,
+                    'user_name' => $account->user->name,
+                    'user_email' => $account->user->email,
+                    'user_mobile' => $account->user->mobile,
+                    'user_type' => User::roleLabel($account->user->user_type),
+                    'bank_name' => $account->bank->name,
+                    'account_holder_name' => $account->account_holder_name,
+                    'account_number' => $account->maskAccountNumber(),
+                    'iban' => $account->iban,
+                    'verification_status' => $account->verification_status,
+                    'verified_at' => $account->verified_at,
+                    'verification_notes' => $account->verification_notes,
+                    'created_at' => $account->created_at,
+                ];
+            }),
+            'pagination' => [
+                'total' => $bankAccounts->total(),
+                'per_page' => $bankAccounts->perPage(),
+                'current_page' => $bankAccounts->currentPage(),
+                'last_page' => $bankAccounts->lastPage(),
+            ],
+        ]);
+    }
+
+    public function adminBankAccountDetail($id)
+    {
+        // Only admins can access this
+        if (!auth()->user()->isAdmin()) {
+            return response([
+                'status' => 0,
+                'message' => 'Unauthorized access.',
+            ], 403);
+        }
+
+        $bankAccount = BankAccount::with(['user', 'bank', 'verifiedByUser'])->find($id);
+
+        if (!$bankAccount) {
+            return response([
+                'status' => 0,
+                'message' => 'Bank account not found.',
+            ], 404);
+        }
+
+        return response([
+            'status' => 1,
+            'bank_account' => [
+                'id' => $bankAccount->id,
+                'user_id' => $bankAccount->user_id,
+                'user_name' => $bankAccount->user->name,
+                'user_email' => $bankAccount->user->email,
+                'user_mobile' => $bankAccount->user->mobile,
+                'user_type' => User::roleLabel($bankAccount->user->user_type),
+                'bank_id' => $bankAccount->bank_id,
+                'bank_name' => $bankAccount->bank->name,
+                'account_holder_name' => $bankAccount->account_holder_name,
+                'account_number' => $bankAccount->account_number,
+                'account_number_masked' => $bankAccount->maskAccountNumber(),
+                'branch_code' => $bankAccount->branch_code,
+                'iban' => $bankAccount->iban,
+                'verification_status' => $bankAccount->verification_status,
+                'verified_by' => $bankAccount->verifiedByUser ? $bankAccount->verifiedByUser->name : null,
+                'verified_at' => $bankAccount->verified_at,
+                'verification_notes' => $bankAccount->verification_notes,
+                'is_primary' => $bankAccount->is_primary,
+                'created_at' => $bankAccount->created_at,
+                'updated_at' => $bankAccount->updated_at,
+            ],
+        ]);
+    }
+
+    public function verifyBankAccount($id, Request $req)
+    {
+        // Only admins can verify
+        if (!auth()->user()->isAdmin()) {
+            return response([
+                'status' => 0,
+                'message' => 'Unauthorized access.',
+            ], 403);
+        }
+
+        $data = $req->validate([
+            'verification_status' => 'required|in:verified,rejected',
+            'verification_notes' => 'required|string|max:500',
+        ]);
+
+        $bankAccount = BankAccount::find($id);
+
+        if (!$bankAccount) {
+            return response([
+                'status' => 0,
+                'message' => 'Bank account not found.',
+            ], 404);
+        }
+
+        if ($bankAccount->verification_status !== 'pending') {
+            return response([
+                'status' => 0,
+                'message' => 'Only pending bank accounts can be verified.',
+            ], 422);
+        }
+
+        $bankAccount->update([
+            'verification_status' => $data['verification_status'],
+            'verification_notes' => $data['verification_notes'],
+            'verified_by' => auth()->id(),
+            'verified_at' => now(),
+        ]);
+
+        // Notify user about verification result
+        $message = $data['verification_status'] === 'verified'
+            ? 'Your bank account has been verified successfully.'
+            : 'Your bank account verification has been rejected.';
+
+        User::storeAppNotification(
+            $bankAccount->user_id,
+            $message,
+            'bank_accounts',
+            'account_updates'
+        );
+
+        return response([
+            'status' => 1,
+            'message' => 'Bank account ' . $data['verification_status'] . ' successfully.',
+            'bank_account' => [
+                'id' => $bankAccount->id,
+                'verification_status' => $bankAccount->verification_status,
+                'verified_at' => $bankAccount->verified_at,
+            ],
+        ]);
     }
 
     

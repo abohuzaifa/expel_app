@@ -91,10 +91,14 @@ Route::group(["middleware"=> "auth:sanctum"], function () {
     Route::get("/logout", [AuthController::class,"logout"])->name('logout');
     Route::get('/deleteUser', [AuthController::class, 'delete'])->name('deleteUser');
     Route::get('/userList/{id}', [AuthController::class,'userList'])->name('userList');
+    Route::get('/contactDetails', [AuthController::class, 'contactDetails'])->name('contactDetails');
     Route::post('/updateUser', [AuthController::class,'updateUser'])->name('updateUser');
     Route::post('/setLocation', [AuthController::class, 'setLocation'])->name('setLocation');
     Route::post('/updateProfileImage/{id}', [AuthController::class, 'updateProfileImage'])->name('updateProfileImage');
+    Route::get('/vehicleSettings', [AuthController::class, 'vehicleSettings'])->name('vehicleSettings');
     Route::post('/cardDetail', [AuthController::class, 'cardDetail'])->name('cardDetail');
+    Route::get('/cardDetails', [AuthController::class, 'cardDetails'])->name('cardDetails');
+    Route::get('/cardDetails/{id}', [AuthController::class, 'showCardDetail'])->name('showCardDetail');
     Route::post('/cardDetailUpdate/{id}', [AuthController::class, 'cardDetailUpdate'])->name('cardDetailUpdate');
     Route::post('/deleteCardDetails/{id}', [AuthController::class, 'deleteCardDetails'])->name('deleteCardDetails');
     Route::post('/updateVehicle', [AuthController::class, 'updateVehicle'])->name('updateVehicle');
@@ -136,6 +140,9 @@ Route::group(["middleware"=> "auth:sanctum"], function () {
     //payment method Apis
     Route::post('/createPaymentMethod', [PaymentController::class, 'create'])->name('createPaymentMethod');
     Route::get('/paymentMethodList', [PaymentController::class, 'list'])->name('paymentMethodList');
+    Route::get('/paymentMethods/{id}', [PaymentController::class, 'show'])->name('paymentMethodShow');
+    Route::match(['post', 'put', 'patch'], '/paymentMethods/{id}', [PaymentController::class, 'update'])->name('paymentMethodUpdate');
+    Route::delete('/paymentMethods/{id}', [PaymentController::class, 'destroy'])->name('paymentMethodDelete');
 
     //order apis
     Route::post('/createOrder', [OrderController::class, 'create'])->name('createOrder');
@@ -179,10 +186,23 @@ Route::group(["middleware"=> "auth:sanctum"], function () {
     
     Route::post('/paymentStatus', [RequestController::class, 'paymentStatus'])->name('paymentStatus');
 
-    Route::patch('/notifications/{id}/read', [NotificationApiController::class, 'markAsRead']);
-    Route::patch('/notifications/read-all', [NotificationApiController::class, 'markAllAsRead']);
+    Route::patch('/notifications/{id}/read', [NotificationApiController::class, 'markAsRead'])->name('notifications.markAsRead');
+    Route::patch('/notifications/read-all', [NotificationApiController::class, 'markAllAsRead'])->name('notifications.markAllAsRead');
 
-    Route::get('/notification-settings', [NotificationSettingController::class, 'show']);
-    Route::post('/notification-settings', [NotificationSettingController::class, 'update']);
+    Route::get('/notification-settings', [NotificationSettingController::class, 'show'])->name('notification-settings.show');
+    Route::post('/notification-settings', [NotificationSettingController::class, 'update'])->name('notification-settings.update');
+
+    // Bank Account APIs
+    Route::get('/bank-accounts', [AuthController::class, 'bankAccounts'])->name('bankAccounts');
+    Route::post('/bank-accounts', [AuthController::class, 'addBankAccount'])->name('addBankAccount');
+    Route::get('/bank-accounts/{id}', [AuthController::class, 'showBankAccount'])->name('showBankAccount');
+    Route::match(['post', 'put', 'patch'], '/bank-accounts/{id}', [AuthController::class, 'updateBankAccount'])->name('updateBankAccount');
+    Route::delete('/bank-accounts/{id}', [AuthController::class, 'deleteBankAccount'])->name('deleteBankAccount');
+    Route::post('/bank-accounts/{id}/set-primary', [AuthController::class, 'setPrimaryBankAccount'])->name('setPrimaryBankAccount');
+
+    // Admin Bank Account Verification APIs (for admin dashboard/app)
+    Route::get('/admin/bank-accounts', [AuthController::class, 'adminBankAccounts'])->name('adminBankAccounts');
+    Route::get('/admin/bank-accounts/{id}', [AuthController::class, 'adminBankAccountDetail'])->name('adminBankAccountDetail');
+    Route::patch('/admin/bank-accounts/{id}/verify', [AuthController::class, 'verifyBankAccount'])->name('verifyBankAccount');
 
 });

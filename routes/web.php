@@ -24,6 +24,8 @@ use App\Http\Controllers\WalletController;
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\PageController;
+use App\Http\Controllers\DriverVerificationController;
+use App\Http\Controllers\BankController;
 
 /*
 |--------------------------------------------------------------------------
@@ -61,13 +63,18 @@ Route::group(['middleware' => ['auth']], function() {
     Route::resource('roles', RoleController::class);
     Route::resource('permission', PermissionController::class);
     Route::resource('users', UserController::class);
+    Route::get('users/{id}/bank-accounts', [UserController::class, 'bankAccounts'])->name('users.bank-accounts');
+    Route::patch('bank-accounts/{id}/verify', [UserController::class, 'verifyBankAccount'])->name('bank-accounts.verify');
+    Route::get('drivers/verifications', [DriverVerificationController::class, 'index'])->name('drivers.verifications.index');
+    Route::get('drivers/verifications/{id}', [DriverVerificationController::class, 'show'])->name('drivers.verifications.show');
+    Route::patch('drivers/verifications/{id}', [DriverVerificationController::class, 'update'])->name('drivers.verifications.update');
     Route::get('sellers_list', [UserController::class,'sellers_list'])->name('sellers_list');
     Route::get('sellers_active/{id}', [UserController::class,'sellers_active'])->name('sellers_active');
     Route::get('sellers_inactive/{id}', [UserController::class,'sellers_inactive'])->name('sellers_inactive');
     Route::resource('category', CategoryController::class);
     Route::resource('request', RequestController::class);
     Route::resource('product', ProductController::class);
-    Route::post('category/add_favourit', 'CategoryController@add_favourit');
+    Route::post('category/add_favourit', [CategoryController::class, 'add_favourit']);
     Route::resource('notifications', NotificationController::class);
 
     Route::resource('wallet', WalletController::class);
@@ -80,6 +87,11 @@ Route::group(['middleware' => ['auth']], function() {
     Route::resource('payment_method', PaymentMethod::class);
     Route::get('active/{id}', [PaymentMethod::class,'active'])->name('active');
     Route::get('inactive/{id}', [PaymentMethod::class,'inactive'])->name('inactive');
+
+    // Bank Management Routes
+    Route::resource('banks', BankController::class);
+    Route::get('banks/{id}/active', [BankController::class, 'active'])->name('banks.active');
+    Route::get('banks/{id}/inactive', [BankController::class, 'inactive'])->name('banks.inactive');
 });
 
 

@@ -14,8 +14,18 @@ class NotificationApiController extends Controller
     public function markAsRead($id)
     {
         try {
+            $user = auth()->user();
+
+            if (!$user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthenticated'
+                ], 401);
+            }
+
             $updated = DB::table('notifications')
                         ->where('id', $id)
+                        ->where('user_id', $user->id)
                         ->update(['is_read' => 1]);
 
             if (!$updated) {
@@ -45,7 +55,17 @@ class NotificationApiController extends Controller
     public function markAllAsRead()
     {
         try {
+            $user = auth()->user();
+
+            if (!$user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthenticated'
+                ], 401);
+            }
+
             $updated = DB::table('notifications')
+                        ->where('user_id', $user->id)
                         ->where('is_read', 0)
                         ->update(['is_read' => 1]);
 

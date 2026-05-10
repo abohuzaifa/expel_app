@@ -36,6 +36,7 @@
    <th>{{trans('lang.email')}}</th>
    <th>{{trans('lang.user_type')}}</th>
    <th>{{trans('lang.status')}}</th>
+   <th>Verification</th>
    <th width="280px">{{trans('lang.action')}}</th>
  </tr>
  @php
@@ -48,16 +49,33 @@
     <td>{{ ++$i }}</td>
     <td>{{ $user->name }}</td>
     <td>{{ $user->email }}</td>
-    <td>{{$user->user_type == 0 ? "ADMIN" : ($user->user_type == 1? "SELLER" : "BUYER")}}</td>
+    <td>{{ \App\Models\User::roleLabel($user->user_type) }}</td>
     <td>
-       @if($user->status == 0)
-       <a class="btn btn-warning text-center" href="{{ route('sellers_active',$user->id) }}">{{trans('lang.deactive')}}</a>
-       @else
-       <a class="btn btn-success text-center" href="{{ route('sellers_inactive',$user->id) }}">{{trans('lang.active')}}</a>
-       @endif</td>
+       <span class="badge {{ $user->status ? 'bg-success' : 'bg-secondary' }}">
+         {{ $user->status ? trans('lang.active') : 'Inactive' }}
+       </span>
+    </td>
     <td>
-       <!-- <a class="btn btn-info" href="{{ route('users.show',$user->id) }}">Show</a> -->
+      @if ((int) $user->user_type === 2)
+      @php $status = $user->verification_status ?? 'pending'; @endphp
+      <span class="badge {{ $status === 'verified' ? 'bg-success' : ($status === 'rejected' ? 'bg-danger' : 'bg-warning text-dark') }}">
+        {{ ucfirst($status) }}
+      </span>
+      @else
+      <span class="text-muted">N/A</span>
+      @endif
+    </td>
+    <td>
        <a class="btn btn-primary" href="{{ route('users.edit',$user->id) }}">{{trans('lang.edit')}}</a>
+       <a class="btn btn-info" href="{{ route('users.bank-accounts',$user->id) }}">Bank Accounts</a>
+       @if ((int) $user->user_type === 2)
+       <a class="btn btn-info" href="{{ route('drivers.verifications.show', $user->id) }}">Review</a>
+       @endif
+       @if($user->status == 0)
+       <a class="btn btn-warning text-center" href="{{ route('sellers_active',$user->id) }}">Activate</a>
+       @else
+       <a class="btn btn-secondary text-center" href="{{ route('sellers_inactive',$user->id) }}">Deactivate</a>
+       @endif
         {!! Form::open(['method' => 'DELETE','route' => ['users.destroy', $user->id],'style'=>'display:inline']) !!}
             {!! Form::submit('Delete', ['class' => 'btn btn-danger']) !!}
         {!! Form::close() !!}

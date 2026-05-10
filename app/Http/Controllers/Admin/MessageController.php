@@ -47,16 +47,21 @@ class MessageController extends Controller
                 $offer = Offer::find($req->offer_id);
                 $user = User::find($offer->user_id);
                 $data['device_token'] = $user->device_token;
+                $data['user_id'] = $user->id;
             } else {
                 $data['is_driver'] = 0;
                 $req = ModelsRequest::where('id', $request->request_id)->first();
                 // $offer = Offer::find($req->offer_id);
                 $user = User::find($req->user_id);
                 $data['device_token'] = $user->device_token;
+                $data['user_id'] = $user->id;
             }
-            
-            User::sendNotification($data);
-            return response()->json(['msg' => $message, 'fcm' => User::sendNotification($data)], 200);
+
+            $data['setting_key'] = 'messages';
+
+            $response = User::sendNotification($data);
+
+            return response()->json(['msg' => $message, 'fcm' => $response], 200);
         }
     }
     public function getChat(Request $req)

@@ -41,7 +41,12 @@
             <input type="text" name="name" class="form-control" required value="{{$payment->name}}">
         </div>
 
-        <div  class="col-xs-12 col-sm-12 col-md-12">
+        <div  class="col-xs-12 col-sm-12 col-md-12 mt-3">
+            <label for="name_ar">Name (AR):</label>
+            <input type="text" name="name_ar" class="form-control" value="{{$payment->name_ar}}">
+        </div>
+
+        <div  class="col-xs-12 col-sm-12 col-md-12 mt-3">
             <label for="slug">{{trans('lang.slug')}}:</label>
             <select type="text" class="form-control" name="slug">
                 <option {{$payment->slug == 'click_pay' ? "selected" : ""}} value="click_pay">{{trans('lang.click_pay')}}</option>
@@ -49,11 +54,11 @@
             </select>
         </div>
 
-        <div  class="col-xs-12 col-sm-12 col-md-12">
+        <div  class="col-xs-12 col-sm-12 col-md-12 mt-3">
             <label for="public_key">{{trans('lang.public_key')}}:</label>
             <input type="text" class="form-control" name="public_key" value="{{$payment->public_key}}">
         </div>
-        <div  class="col-xs-12 col-sm-12 col-md-12">
+        <div  class="col-xs-12 col-sm-12 col-md-12 mt-3">
             <label for="secret_key">{{trans('lang.secret_key')}}:</label>
             <input type="text" class="form-control" name="secret_key" value="{{$payment->secret_key}}">
         </div><br>

@@ -51,7 +51,7 @@
     <td>{{ ++$i }}</td>
     <td>{{ $user->name }}</td>
     <td>{{ $wallet->amount }}</td>
-    <td>{{$user->user_type == 0 ? "ADMIN" : ($user->user_type == 1? "SELLER" : "BUYER")}}</td>
+    <td>{{ \App\Models\User::roleLabel($user->user_type) }}</td>
     <td>
        @if($user->status == 0)
        <a class="btn btn-warning text-center" >{{trans('lang.deactive')}}</a>
