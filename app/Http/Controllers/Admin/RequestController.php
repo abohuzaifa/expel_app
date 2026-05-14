@@ -198,54 +198,49 @@ class RequestController extends Controller
 
     public function offerList()
     {
-        
-       // Get the current date
+        // Get the current date
         $currentDate = Carbon::now()->format('Y-m-d');
 
         $requestIds = ModelRequest::where('user_id', auth()->user()->id)
             ->where('status', 0)
             ->whereDate('to_date', '>=', $currentDate)
-            ->pluck('id');
-        // print_r($requestIds); exit;
-        $requestIds = json_decode(json_encode($requestIds), true);
+            ->pluck('id')
+            ->toArray();
+
         if(count($requestIds) > 0)
         {
             $offers = Offer::with([
                 'request' => function($query) use ($requestIds) {
                     $query->select('id', 'user_id', 'parcel_lat', 'parcel_long', 'parcel_address', 'receiver_lat', 'receiver_long', 'receiver_address', 'from_date', 'to_date')
-                        ->whereIn('id', $requestIds); // Filter the requests by specified IDs
-                    // If you want to include user data related to the request, uncomment the following:
-                    // ->with(['user' => function($query) {
-                    //     $query->select('id', 'name', 'email', 'mobile');  // Specify columns for the user related to the request
-                    // }]);
+                        ->whereIn('id', $requestIds);
                 },
                 'user' => function($query) {
                     $query->select('id', 'name', 'email', 'mobile', 'latitude', 'longitude', 'street_address');
                 }
-            ])->whereIn('request_id', $requestIds)->where('is_reject', 0)->get();
-                // print_r($offers); exit;
+            ])
+            ->whereIn('request_id', $requestIds)
+            ->where('is_reject', 0)
+            ->where('is_accept', 0)
+            ->get();
+
             if(count($offers) > 0)
             {
-                foreach($offers as $key => $offer)
-                {
-    
-                    // $offers[$key]['data'] = $this->calculateDistanceAndTime($offer->request->parcel_lat,$offer->request->parcel_long, $offer->user->latitude, $offer->user->longitude);
-                }
                 return response()->json([
+                    'status' => true,
                     'offers' => $offers
                 ]);
             } else {
                 return response()->json([
+                    'status' => false,
                     'msg' => 'No Offer found'
                 ]);
             }
-            
         } else {
             return response()->json([
+                'status' => false,
                 'msg' => 'No Offer found'
             ]);
         }
-        
     }
 
     
