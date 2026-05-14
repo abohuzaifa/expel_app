@@ -222,7 +222,7 @@ class RequestController extends Controller
             ->where('is_reject', 0)
             ->where('is_accept', 0)
             ->get();
-            print_r($offers); exit;
+            // print_r($offers); exit;
             if(count($offers) > 0)
             {
                 return response()->json([
