@@ -527,9 +527,9 @@ class RequestController extends Controller
     public function markCompleteRequest(Request $req)
     {
         $req->validate(['code' => 'required']);
-        
+        $id = intval(explode("|", $req->code)[0]);
         // Validate request exists
-        $request = ModelRequest::where('code', trim(strip_tags($req->code)))->first();
+        $request = ModelRequest::where('id', $id)->first();
         if (!$request) {
             return response()->json(['msg' => 'Code does not match']);
         }
