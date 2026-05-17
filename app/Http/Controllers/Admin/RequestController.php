@@ -529,7 +529,7 @@ class RequestController extends Controller
         $req->validate(['code' => 'required']);
         
         // Validate request exists
-        $request = ModelRequest::where('code', $req->code)->first();
+        $request = ModelRequest::where('code', trim($req->code))->first();
         if (!$request) {
             return response()->json(['msg' => 'Code does not match']);
         }
