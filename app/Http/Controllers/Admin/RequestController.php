@@ -526,135 +526,121 @@ class RequestController extends Controller
     }
     public function markCompleteRequest(Request $req)
     {
-        // print_r(auth()->user()); exit;
-        $req->validate([
-            'code' => 'required'
-        ]);
-        $request = ModelRequest::where('code',$req->code)->first();
+        $req->validate(['code' => 'required']);
         
-
-        // print_r($update); exit;
-        if($request)
-        {
-            $pm = PaymentMethod::find($request->payment_method);
-            if($pm->slug == "click_pay")
-            {
-                if(isset($request->payment_status) && $request->payment_status == 1)
-                {
-                    $update = ModelRequest::where('code', $req->code)->update(['status' => 3]);
-                    $offer = Offer::where('is_accept', 1)->find($request->offer_id);
-                    if (is_null($offer) || is_null($offer->id)) {
-                        return response()->json(['msg' => 'Offer not found']);
-                    }
-                    $wallet = Wallet::where('user_id', $offer->user_id)->first();
-                    if(isset($wallet->id) && $wallet->id > 0)
-                    {
-                        $amount = $wallet->amount  + subtractFivePercent($request->amount) ;
-                        $walletUpdate = DB::table('wallets')->where('id', $wallet->id)->update([
-                            'amount' => $amount
-                        ]);
-                    } else {
-                        return response()->json(['msg' => 'Driver wallet not found']);
-                    }
-                    if($walletUpdate)
-                    {
-                        $wallet_history = WalletHistory::create([
-                            'wallet_id' => $wallet->id,
-                            'amount' => subtractFivePercent($request->amount),
-                            'is_deposite' => 1,
-                            'description' => 'Payment of ride which ID is'.$req->request_id,
-                        ]);
-                        if($wallet_history)
-                        {
-                            $user = User::find($request->user_id);
-                            $data = [];
-                            $data['title'] = 'Request Completed';
-                            $data['body'] = 'Your parcel delivered Successfully with the request ID : '.$request->id;
-                            $data['device_token'] = $user->device_token;
-                            $data['request_id'] = $request->id;
-                            $data['is_driver'] = 0;
-                            $data['user_id'] = $user->id;
-                            $data['setting_key'] = 'trip_alert';
-                            
-                            $res = User::sendNotification($data);
-                            User::where('id', $user->id)->update(['is_available' => 1]);
-                            return response()->json(['msg' => 'Request status update successfully', 'fcm' => $res]);
-                        }  else {
-                            return response()->json(['msg' => 'History not created of current request']);
-                        }
-                    }  else {
-                        return response()->json(['msg' => 'Wallet updation faild']);
-                    }
-                } else {
-                    return response()->json(['msg' => 'Did you received payment, If received then press YES Or NOT']);
-                }
-            } else if($pm->slug == "COD") {
-                if(isset($request->payment_status) && $request->payment_status == 1)
-                {
-                    $update = ModelRequest::where('code', $req->code)->update(['status' => 3]);
-                    $offer = Offer::where('is_accept', 1)->find($request->offer_id);
-                    if (is_null($offer) || is_null($offer->id)) {
-                        return response()->json(['msg' => 'Offer not found']);
-                    }
-                    $wallet = Wallet::where('user_id', $offer->user_id)->first();
-                    if(isset($wallet->id) && $wallet->id > 0)
-                    {
-                        $amount = $wallet->amount  - getFivePercent($request->amount) ;
-                        $walletUpdate = DB::table('wallets')->where('id', $wallet->id)->update([
-                            'amount' => $amount
-                        ]);
-                    } else {
-                        return response()->json(['msg' => 'Driver wallet not found']);
-                    }
-                    if($walletUpdate)
-                    {
-                        $wallet_history = WalletHistory::create([
-                            'wallet_id' => $wallet->id,
-                            'amount' => getFivePercent($request->amount),
-                            'is_expanse' => 1,
-                            'description' => 'Payment of ride which ID is'.$req->request_id,
-                        ]);
-                            $user = auth()->user();
-                            $data = [];
-                            $data['title'] = 'Wallet Charge';
-                            $data['body'] = 'Your Wallet charged with amount '.getFivePercent($request->amount).' againest request ID : '.$request->id;
-                            $data['device_token'] = $user->device_token;
-                            $data['request_id'] = $request->id;
-                            $data['is_driver'] = 1;
-                            $data['user_id'] = $user->id;
-                            $data['setting_key'] = 'account_updates';
-                            
-                            $res[] = User::sendNotification($data);
-                        if($wallet_history)
-                        {
-                            $user = User::find($request->user_id);
-                            $data = [];
-                            $data['title'] = 'Request Completed';
-                            $data['body'] = 'Your parcel delivered Successfully with the request ID : '.$request->id;
-                            $data['device_token'] = $user->device_token;
-                            $data['request_id'] = $request->id;
-                            $data['is_driver'] = 0;
-                            $data['user_id'] = $user->id;
-                            $data['setting_key'] = 'trip_alert';
-                            
-                            $res[] = User::sendNotification($data);
-                            User::where('id', $user->id)->update(['is_available' => 1]);
-                            return response()->json(['msg' => 'Request status update successfully', 'fcm' => $res]);
-                        }  else {
-                            return response()->json(['msg' => 'History not created of current request']);
-                        }
-                    }
-                }
-                else {
-                    return response()->json(['msg' => 'Did you received payment, If received then press YES Or NOT', 'request_id' => $request->id]);
-                }
-            } else {
-                return response()->json(['msg' => 'No payment method found']);
-            }
-            
-        }  else {
+        // Validate request exists
+        $request = ModelRequest::where('code', $req->code)->first();
+        if (!$request) {
             return response()->json(['msg' => 'Code does not match']);
         }
+        
+        // Validate payment method exists
+        $paymentMethod = PaymentMethod::find($request->payment_method);
+        if (!$paymentMethod) {
+            return response()->json(['msg' => 'No payment method found']);
+        }
+        
+        // Validate payment status
+        if (!isset($request->payment_status) || $request->payment_status != 1) {
+            return response()->json(['msg' => 'Did you received payment, If received then press YES Or NOT']);
+        }
+        
+        // Validate offer exists
+        $offer = Offer::where('is_accept', 1)->find($request->offer_id);
+        if (!$offer || !$offer->id) {
+            return response()->json(['msg' => 'Offer not found']);
+        }
+        
+        // Validate driver wallet exists
+        $wallet = Wallet::where('user_id', $offer->user_id)->first();
+        if (!$wallet || $wallet->id <= 0) {
+            return response()->json(['msg' => 'Driver wallet not found']);
+        }
+        
+        // Update request status to completed
+        ModelRequest::where('code', $req->code)->update(['status' => 3]);
+        
+        // Determine payment processing based on payment method
+        $isClickPay = $paymentMethod->slug === 'click_pay';
+        $amountToProcess = $isClickPay 
+            ? subtractFivePercent($request->amount) 
+            : getFivePercent($request->amount);
+        
+        // Calculate new wallet amount
+        $newWalletAmount = $isClickPay 
+            ? $wallet->amount + $amountToProcess
+            : $wallet->amount - $amountToProcess;
+        
+        // Update wallet balance
+        $walletUpdate = DB::table('wallets')
+            ->where('id', $wallet->id)
+            ->update(['amount' => $newWalletAmount]);
+        
+        if (!$walletUpdate) {
+            return response()->json(['msg' => 'Wallet updation faild']);
+        }
+        
+        // Create wallet history record
+        $historyData = [
+            'wallet_id' => $wallet->id,
+            'amount' => $amountToProcess,
+            'description' => 'Payment of ride which ID is' . $req->request_id,
+        ];
+        
+        if ($isClickPay) {
+            $historyData['is_deposite'] = 1;
+        } else {
+            $historyData['is_expanse'] = 1;
+        }
+        
+        $walletHistory = WalletHistory::create($historyData);
+        
+        if (!$walletHistory) {
+            return response()->json(['msg' => 'History not created of current request']);
+        }
+        
+        // Send notifications based on payment method
+        $notifications = $this->sendRequestCompletionNotifications($request, $paymentMethod, $amountToProcess);
+        
+        return response()->json(['msg' => 'Request status update successfully', 'fcm' => $notifications]);
+    }
+    
+    private function sendRequestCompletionNotifications($request, $paymentMethod, $amountToProcess)
+    {
+        $notifications = [];
+        
+        // For COD: Notify driver about wallet charge
+        if ($paymentMethod->slug === 'COD') {
+            $driverUser = auth()->user();
+            $driverNotification = [
+                'title' => 'Wallet Charge',
+                'body' => 'Your Wallet charged with amount ' . $amountToProcess . ' againest request ID : ' . $request->id,
+                'device_token' => $driverUser->device_token,
+                'request_id' => $request->id,
+                'is_driver' => 1,
+                'user_id' => $driverUser->id,
+                'setting_key' => 'account_updates',
+            ];
+            $notifications[] = User::sendNotification($driverNotification);
+        }
+        
+        // Notify customer about delivery completion
+        $customer = User::find($request->user_id);
+        $customerNotification = [
+            'title' => 'Request Completed',
+            'body' => 'Your parcel delivered Successfully with the request ID : ' . $request->id,
+            'device_token' => $customer->device_token,
+            'request_id' => $request->id,
+            'is_driver' => 0,
+            'user_id' => $customer->id,
+            'setting_key' => 'trip_alert',
+        ];
+        $notifications[] = User::sendNotification($customerNotification);
+        
+        // Mark customer as available
+        User::where('id', $request->user_id)->update(['is_available' => 1]);
+        
+        return $notifications;
     }
 
     public function paymentStatus(Request $req)
