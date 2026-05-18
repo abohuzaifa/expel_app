@@ -100,7 +100,7 @@ function send_message($data, $mobile)
     curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
 
     $headers = array();
-    $headers[] = 'Authorization: Bearer EAAOh9TZC2MtUBOZCzd0p4u5w9YoFZAqLJF7sZBMsdDdirZCvZChVUj5UZCNv4yqZAwyXHFIEb4QFbv7qLDGhPFcwZA0fJuNYlfe23qx7wPeZCxaWdcNya1aRZC7hdZCuEpf49gWKk28rgT2twDWmFOq8yg7I3A2v1emQZBWdoQhPTu78UUjqNSwkBTBZBmhnUjSHF3yyjHDAZDZD';
+    $headers[] = 'Authorization: Bearer EAAOh9TZC2MtUBP5wYPMove26bnrydKo7r51zQ2yaaHT7Ix4imZCzLsgDamwxVAp419nvF6SchH0zpBZBmIPmvbmyhQiQL4uG96GCwxJZB12OxaEZBAScOU6CxKZAlWG2au3l7SnPNgZAuyGN4nntoAXTVtmCxiZAwka956pMKmsN49BOKU04l8bXu98Ng1zCLQZDZD';
     $headers[] = 'Content-Type: application/json';
     curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 
@@ -145,7 +145,7 @@ function receiverWhatsappAddress($data)
     curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
 
     $headers = array();
-    $headers[] = 'Authorization: Bearer EAAOh9TZC2MtUBOZCzd0p4u5w9YoFZAqLJF7sZBMsdDdirZCvZChVUj5UZCNv4yqZAwyXHFIEb4QFbv7qLDGhPFcwZA0fJuNYlfe23qx7wPeZCxaWdcNya1aRZC7hdZCuEpf49gWKk28rgT2twDWmFOq8yg7I3A2v1emQZBWdoQhPTu78UUjqNSwkBTBZBmhnUjSHF3yyjHDAZDZD';
+    $headers[] = 'Authorization: Bearer EAAOh9TZC2MtUBP5wYPMove26bnrydKo7r51zQ2yaaHT7Ix4imZCzLsgDamwxVAp419nvF6SchH0zpBZBmIPmvbmyhQiQL4uG96GCwxJZB12OxaEZBAScOU6CxKZAlWG2au3l7SnPNgZAuyGN4nntoAXTVtmCxiZAwka956pMKmsN49BOKU04l8bXu98Ng1zCLQZDZD';
     $headers[] = 'Content-Type: application/json';
     curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 

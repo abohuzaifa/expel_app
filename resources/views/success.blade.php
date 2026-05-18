@@ -40,9 +40,9 @@
     </style>
       <div class="card">
       <div style="border-radius:200px; height:200px; width:200px; background: #F8FAF5; margin:0 auto;">
-        <i class="checkmark"><?= $status == 1 ? '✓' : 'X' ?></i>
+        <i class="checkmark"><?= $data['status'] == 1 ? '✓' : 'X' ?></i>
       </div>
-        <h1><?= $status == 1 ? trans("lang.success") : trans("lang.failed") ?></h1> 
+        <h1><?= $data['status'] == 1 ? trans("lang.success") : trans("lang.failed") ?></h1> 
         <!-- <p>{{trans("lang.we_received_your_request")}}<br/>{{trans("lang.in_touch_shortly")}}</p> -->
       </div>
  

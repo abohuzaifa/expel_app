@@ -27,6 +27,7 @@ class SuccessController extends Controller
         $id = base64_decode($id);
         $wdata['code'] = $id."|".generateRandomCode();
         $offer_id = base64_decode($offer_id);
+            $data['status'] = 0;
 
         $request = ModelsRequest::find($id);
         $pm = PaymentMethod::where('slug', 'click_pay')->first();
@@ -79,25 +80,48 @@ class SuccessController extends Controller
         $wh_id = $data['wh_id'];
 
         $wallet = WalletHistory::find($wh_id);
+        $status = 0;
+        $message = 'Payment verification failed.';
         if($wallet)
         {
             $pm = PaymentMethod::find($data['payment_method']);
-            if($pm->slug == "click_pay"){
+            if($pm && $pm->slug == "click_pay"){
                 $data['secret_key'] = $pm->secret_key;
                 $data['invoice_id'] = $wallet->invoice_id;
-                $status = Order::clickPayOrderStatus($data);
-                $status = json_decode($status, true);
-                if(isset($status['invoice_status']) && $status['invoice_status'] == "paid")
+                $paymentStatus = Order::clickPayOrderStatus($data);
+                $paymentStatus = json_decode($paymentStatus, true);
+                if(isset($paymentStatus['invoice_status']) && $paymentStatus['invoice_status'] == "paid")
                 {
                     // print_r($status); exit;
-                    DB::table("wallets")->where("id", "=", $wallet_id )->update([
-                        "amount" => $amount,
+                    $walletData = Wallet::find($wallet->wallet_id);
+                    if($walletData)
+                    {
+                        $amount = $walletData->amount + $amount;
+                        $flag = DB::table("wallets")->where("id", "=", $wallet_id )->update([
+                            "amount" => $amount,
+                        ]);
+                        if($flag)
+                        {
+                            $status = 1;
+                            $message = 'Payment verified successfully.';
+                        }
+                    } else {
+                        $message = 'Wallet not found.';
+                    }
+                } else {
+                    WalletHistory::where("id", "=", $wh_id)->update([
+                        "status" => 0,
                     ]);
+                    $message = 'Payment was not completed.';
+                        }
+            } else {
+                $message = 'Unsupported payment method.';
                 }
-    
-            }
-            return view('charge_in');
-
         }
+
+        return view('charge_in', [
+            'status' => $status,
+            'message' => $message,
+        ]);
     }
 }

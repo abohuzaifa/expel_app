@@ -306,10 +306,10 @@ class RequestController extends Controller
                     // User::where('id', $driver->id)->update(['is_available' => 0]);
                     return response()->json(['data' => $payment, 'pn_status' => $res, 'waba' => $waba]);
                 } else {
-                    return response()->json(['msg' => "Update method fails"]);
+                    return response()->json(['msg' => "Update click pay method fails"]);
                 }
             } else {
-                return response()->json(['msg' => "Something Wrong in request."]);
+                return response()->json(['msg' => "Something Wrong in click pay request."]);
             }
         } elseif($pm->slug == 'COD') {
             // echo "success"; exit;
@@ -562,7 +562,7 @@ class RequestController extends Controller
         }
         
         // Update request status to completed
-        ModelRequest::where('code', $req->code)->update(['status' => 3]);
+        ModelRequest::where('id', $id)->update(['status' => 3]);
         
         // Determine payment processing based on payment method
         $isClickPay = $paymentMethod->slug === 'click_pay';
