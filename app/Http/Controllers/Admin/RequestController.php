@@ -411,14 +411,18 @@ class RequestController extends Controller
                                     return response()->json(['data' => [
                                         'msg' => 'request accepted successfully', 'pn_status' => $res
                                     ]]);
+                                } else {
+                                    return response()->json(['data' => [
+                                        'msg' => 'Wallet charge request failed'
+                                    ]]);
                                 }
                             } else {
                                 return response()->json(['data' => [
-                                    'msg' => 'Wallet charge request faild'
+                                    'msg' => 'Wallet charge request failed'
                                 ]]);
                             }
                         } else {
-                            return response()->json(['msg' => "Update method fails"]);
+                            return response()->json(['msg' => "Payment status updation failed"]);
                         }
                         
                 }  catch (\Exception $e) {
@@ -521,7 +525,7 @@ class RequestController extends Controller
                     return response()->json(['msg' => 'Did you received payment, If received then press YES Or NOT', 'request_id' => $request->id]);
                 }
         } else {
-
+            return 2;
         }
     }
     public function markCompleteRequest(Request $req)
@@ -646,22 +650,23 @@ class RequestController extends Controller
     public function paymentStatus(Request $req)
     {
         $req->validate([
-            'request_id' => 'required|int'
+            'request_id' => 'required|int',
+            'payment_status' => 'required|int'
         ]);
         
-        $update = ModelRequest::where('id', $req->request_id)->update(['payment_status' => 1]);
+        $update = ModelRequest::where('id', $req->request_id)->update(['payment_status' => $req->payment_status]);
         
         if($update)
         {
             $data = $this->carryRequestAfterPaymentChangeStatus($req->request_id);
             if($data == 1)
             {
-                return response()->json(['msg' => 'Request status update successfully']);
+                return response()->json(['msg' => 'Request mark completed successfully']);
             } else {
-                return response()->json(['msg' => 'Request status updataion failed']);
+                return response()->json(['msg' => 'Request status updation failed']);
             }
         } else {
-            return response()->json(['msg' => 'Payent status updation failed']);
+            return response()->json(['msg' => 'Payment status updation failed']);
         }
     }
     public function parcelConfirmationApi(Request $req)
@@ -698,7 +703,7 @@ class RequestController extends Controller
         {
             return response()->json(['msg' => 'Receiver address update successfully']);
         } else {
-            return response()->json(['msg' => 'Receiver address update faild']);
+            return response()->json(['msg' => 'Receiver address update failed']);
         }
     }
     public function near_by_drivers(Request $req)

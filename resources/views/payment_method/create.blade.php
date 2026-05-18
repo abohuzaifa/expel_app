@@ -45,6 +45,7 @@
             <select type="text" class="form-control" name="slug">
                 <option value="click_pay">{{trans('lang.click_pay')}}</option>
                 <option value="COD">{{trans('lang.cod')}}</option>
+                <option value="wallet">{{trans('lang.wallet')}}</option>
             </select>
         </div>
 

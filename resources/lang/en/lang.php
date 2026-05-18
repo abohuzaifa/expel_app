@@ -1,5 +1,6 @@
 <?php
 return [
+    'wallet' => 'Wallet',
     'welcome' => 'Welcome to our website!',
     // Add more English translations
     'labeey' => 'Turd App',

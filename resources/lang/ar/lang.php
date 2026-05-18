@@ -1,5 +1,6 @@
 <?php
 return [
+    'wallet' => 'المحفظة',
     'welcome' => 'مرحبا بكم في موقعنا!',
     // Add more English translations
     'labeey' => 'طرد ایپ',
