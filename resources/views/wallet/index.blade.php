@@ -62,6 +62,7 @@
        <!-- <a class="btn btn-info" href="{{ route('users.show',$user->id) }}">Show</a> -->
        <!-- <a class="btn btn-primary" href="{{ route('wallet.edit',$wallet->id) }}">{{trans('lang.recharge')}}</a> -->
        <a class="btn btn-primary" href="{{ route('wallet.edit',$wallet->id) }}">{{trans('lang.update_wallet')}}</a>
+       <a class="btn btn-outline-secondary" href="{{ route('wallet.history',$wallet->id) }}">History</a>
         
     </td>
   </tr>

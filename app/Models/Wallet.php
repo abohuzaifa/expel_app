@@ -15,6 +15,11 @@ class Wallet extends Model
         'amount',
     ];
 
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
     public static function clickPay($data)
     {
 

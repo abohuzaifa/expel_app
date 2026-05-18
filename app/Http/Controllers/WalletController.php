@@ -17,6 +17,22 @@ class WalletController extends Controller
         return view('wallet.index', $data);
     }
 
+    public function history($id)
+    {
+        $wallet = Wallet::with('user')->findOrFail($id);
+        $history = WalletHistory::where('wallet_id', $wallet->id)
+            ->orderByDesc('id')
+            ->paginate(15);
+
+        $summary = [
+            'credits' => WalletHistory::where('wallet_id', $wallet->id)->where('is_deposite', 1)->sum('amount'),
+            'debits' => WalletHistory::where('wallet_id', $wallet->id)->where('is_expanse', 1)->sum('amount'),
+            'failed' => WalletHistory::where('wallet_id', $wallet->id)->where('status', 0)->count(),
+        ];
+
+        return view('wallet.history', compact('wallet', 'history', 'summary'));
+    }
+
     public function edit($id)
     {
         $wallet = Wallet::find($id);

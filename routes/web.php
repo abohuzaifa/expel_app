@@ -78,6 +78,7 @@ Route::group(['middleware' => ['auth']], function() {
     Route::resource('notifications', NotificationController::class);
 
     Route::resource('wallet', WalletController::class);
+    Route::get('wallet/{id}/history', [WalletController::class, 'history'])->name('wallet.history');
     Route::resource('banners', BannerController::class);
 
     Route::get('banner_active/{id}', [BannerController::class,'banner_active'])->name('banner_active');

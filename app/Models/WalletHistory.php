@@ -18,7 +18,8 @@ class WalletHistory extends Model
         'description',
         'order_id',
         'invoice_id',
-        'is_read'
+        'is_read',
+        'status',
     ];
 
     protected $casts = [
