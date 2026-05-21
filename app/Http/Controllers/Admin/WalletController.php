@@ -5,13 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\Models\Product;
-use App\Models\Shop;
-use App\Models\User;
-use App\Models\Order;
-use App\Models\OrderItem;
 use App\Models\PaymentMethod;
-use App\Models\CardDetail;
 use App\Models\Offer;
 use App\Models\Request as ModelsRequest;
 use App\Models\Wallet;
@@ -19,121 +13,139 @@ use App\Models\WalletHistory;
 
 class WalletController extends Controller
 {
-    //
+    private function currentWallet(): ?Wallet
+    {
+        return Wallet::where('user_id', auth()->id())->first();
+    }
+
+    private function walletNotFoundResponse()
+    {
+        return response()->json([
+            'status' => 0,
+            'message' => 'Wallet not found',
+        ]);
+    }
+
+    private function buildCustomerFragment(): string
+    {
+        $user = auth()->user();
+
+        return sprintf(
+            '"name": %s, "email": %s, "phone": %s, "street1": %s',
+            json_encode($user->name ?? ''),
+            json_encode($user->email ?? ''),
+            json_encode($user->mobile ?? ''),
+            json_encode($user->street_address ?? '')
+        );
+    }
+
+    private function buildInvoiceItemsFragment(float $amount, int $walletId): string
+    {
+        $amount = number_format($amount, 2, '.', '');
+
+        return sprintf(
+            '{"sku": %s, "description": %s, "url": %s, "unit_cost": %s, "quantity": 1, "net_total": %s, "discount_rate": 0, "discount_amount": 0, "tax_rate": 0, "tax_total": 0, "total": %s}',
+            json_encode((string) $walletId),
+            json_encode('Recharge Amount'),
+            json_encode(''),
+            $amount,
+            $amount,
+            $amount
+        );
+    }
+
+    private function apiResponse(array $payload, int $statusCode = 200)
+    {
+        return response()->json($payload, $statusCode);
+    }
+
     public function charge_in(Request $req)
     {
-        $attrs = $req->validate([
-            'amount' => "required",
-            'payment_method' => "required"
+        $data = $req->validate([
+            'amount' => 'required|numeric|min:0.01',
+            'payment_method' => 'required|integer|exists:payment_methods,id',
+            'note' => 'nullable|string|max:1000',
         ]);
-        $url_data['amount'] = $attrs['amount'];
-        $wallet['description'] = $req->note;
+
         $user = auth()->user();
-        $wallet['total'] = $attrs['amount'];
-        $wallet['customer'] = '
-            "name": "'.$user->name.'",
-            "email": "'.$user->email.'",
-            "phone": "'.$user->mobile.'",
-            "street1": "'.$user->street_address.'"
-            ';
-        
-        $wallet_data = DB::table("wallets")->where('user_id', $user->id)->get();
-        // print_r($wallet_data); exit;
-        if(count($wallet_data) > 0)
-        {
-            $wallet_data = $wallet_data[0];
-            $wallet['wallet_id'] = $wallet_data->id;
-            $url_data['wallet_id'] = $wallet_data->id;
-        } else {
-            return response([
-                'status' => "0",
-                "message" => "Wallet not exist"
+        $wallet = $this->currentWallet();
+
+        if (!$wallet) {
+            return $this->walletNotFoundResponse();
+        }
+
+        $paymentMethod = PaymentMethod::find($data['payment_method']);
+
+        if (!$paymentMethod) {
+            return $this->apiResponse([
+                'status' => 0,
+                'message' => 'Payment method not found.',
             ]);
         }
-        
-        
-        // echo $data['redirect_url']; exit;
 
-        $wallet_history = WalletHistory::create([
-            'wallet_id' => $wallet['wallet_id'],
-            'amount' => $attrs['amount'],
+        if ($paymentMethod->slug !== 'click_pay') {
+            return $this->apiResponse([
+                'status' => 0,
+                'message' => 'Unsupported payment method.',
+            ]);
+        }
+
+        $walletHistory = WalletHistory::create([
+            'wallet_id' => $wallet->id,
+            'amount' => $data['amount'],
             'is_deposite' => 1,
-            'description' => $req->note,
+            'description' => $data['note'] ?? null,
         ]);
-        
-        if($wallet_history)
-        {
-            $wh_id = $wallet_history->id;
-            $url_data['wh_id'] = $wh_id;
-        } else {
-            return response([
-                'status' => "0",
-                "message" => "Something went wrong"
+
+        $urlData = [
+            'amount' => $data['amount'],
+            'wallet_id' => $wallet->id,
+            'wh_id' => $walletHistory->id,
+            'payment_method' => $paymentMethod->id,
+        ];
+
+        $walletPayload = [
+            'description' => $data['note'] ?? '',
+            'total' => $data['amount'],
+            'customer' => $this->buildCustomerFragment(),
+            'wallet_id' => $wallet->id,
+            'invoice_items' => $this->buildInvoiceItemsFragment((float) $data['amount'], $wallet->id),
+            'redirect_url' => url()->to('/charge_in/' . base64_encode(json_encode($urlData))),
+            'profile_key' => $paymentMethod->public_key,
+            'secret_key' => $paymentMethod->secret_key,
+        ];
+
+        $result = json_decode(Wallet::clickPay($walletPayload), true);
+        $result = is_array($result) ? $result : [];
+        $result['id'] = $wallet->id;
+
+        if (isset($result['invoice_id'])) {
+            $walletHistory->update([
+                'invoice_id' => $result['invoice_id'],
+            ]);
+
+            return $this->apiResponse([
+                'status' => 1,
+                'data' => $result,
             ]);
         }
-        $wallet['invoice_items'] = '{
-            "sku": "'.$wallet['wallet_id'].'",
-            "description": "Recharge Amount",
-            "url": "",
-            "unit_cost": '.round($attrs['amount'], 2).',
-            "quantity": 1,
-            "net_total": '.round($attrs['amount'], 2).',
-            "discount_rate": 0,
-            "discount_amount": 0,
-            "tax_rate": 0,
-            "tax_total": 0,
-            "total": '.round($attrs['amount'], 2).'
-        }';
-            $pm = PaymentMethod::find($attrs["payment_method"]);
-            // print_r($pm); exit;
-            if($pm->slug == "click_pay")
-            {
-                $url_data['payment_method'] = $pm->id;
-                $wallet['redirect_url'] = url()->to('/charge_in/'.base64_encode(json_encode($url_data)));
-                $wallet['profile_key'] = $pm->public_key;
-                $wallet['secret_key'] = $pm->secret_key;
-                $res = Wallet::clickPay($wallet);
-                $res = json_decode($res, true);
-                $res['id'] = $wallet_data->id;
-                if(isset($res['invoice_id']))
-                {
-                    DB::table('wallet_histories')->where('id', $wh_id)->update([
-                        'invoice_id' => $res['invoice_id']
-                    ]);
-                    return response([
-                        'status' => "1",
-                        "data" => $res
-                    ]);
-                } else {
-                    return response([
-                        'status' => "0",
-                        "message" => "Transaction pending"
-                    ]);
-                }
 
-            } else if($pm->slug == "COD"){
-                // DB::table("orders")->where("id", "=", $order['id'])->update([
-                //     'seller_id' =>$seller_id
-                // ]);
-                // DB::select("DELETE FROM carts WHERE user_id=".auth()->user()->id);
-                // DB::commit();
-                // return response([
-                //     "status" => "1",
-                //     "data" => $order
-                // ]);
-
-            }
-
+        return $this->apiResponse([
+            'status' => 0,
+            'message' => 'Transaction pending',
+        ]);
     }
 
     public function getWalletSummary()
     {
-        $user = auth()->user();
-        $wallet = Wallet::where('user_id', $user->id)->first();
+        $wallet = $this->currentWallet();
 
-        if (is_null($wallet) || is_null($wallet->id)) {
-            return response()->json(['msg' => 'Wallet not found']);
+        if (!$wallet) {
+            return $this->apiResponse([
+                'msg' => 'Wallet not found',
+            ]);
         }
+
         $deposits = WalletHistory::where('wallet_id', $wallet->id)
             ->where('is_deposite', 1)
             ->sum('amount');
@@ -145,186 +157,224 @@ class WalletController extends Controller
         $recentEntry = WalletHistory::where('wallet_id', $wallet->id)->where('is_deposite', 1)
             ->orderBy('created_at', 'desc')
             ->first();
-        
-            return response()->json([
-                'earnings' => $deposits,
-                'withdral' => $expenses,
-                'balance' => $wallet->amount,
-                'current_earning' => $recentEntry
-            ]);
+
+        return $this->apiResponse([
+            'earnings' => $deposits,
+            'withdral' => $expenses,
+            'balance' => $wallet->amount,
+            'current_earning' => $recentEntry,
+        ]);
     }
+
     public function wallet()
     {
-        $wallet = DB::table('wallets')->where("user_id", auth()->user()->id)->get();
-        return response([
+        $wallet = $this->currentWallet();
+
+        if (!$wallet) {
+            return $this->walletNotFoundResponse();
+        }
+
+        return $this->apiResponse([
             'status' => 1,
-            "wallet" => json_decode(json_encode($wallet[0]), true)
+            'wallet' => $wallet->toArray(),
         ]);
     }
 
     public function walletTransfer(Request $req)
     {
         $data = $req->validate([
-            'user_id' => 'required|int',
-            'amount' => 'required',
+            'user_id' => 'required|integer|exists:users,id|different:' . auth()->id(),
+            'amount' => 'required|numeric|min:0.01',
+            'note' => 'nullable|string|max:1000',
         ]);
-        DB::beginTransaction();
-        $user_wallet = Wallet::where('user_id',auth()->user()->id)->first();
-        $get_user_wallet = Wallet::where('user_id',$req->user_id)->first();
-        // print_r($get_user_wallet); exit;
-        if(doubleval($user_wallet->amount) < doubleval($data['amount']))
-        {
-            return response([
+
+        $senderWallet = $this->currentWallet();
+        $receiverWallet = Wallet::where('user_id', $data['user_id'])->first();
+
+        if (!$senderWallet || !$receiverWallet) {
+            return $this->apiResponse([
                 'status' => 0,
-                'message' =>  'Wallet have not enough amount.'
+                'message' => 'Wallet not found.',
             ]);
         }
-        $transfer_amount = doubleval($user_wallet->amount) - doubleval($data['amount']); //echo $transfer_amount; exit;
-        $user_wault_update = DB::table('wallets')->where('user_id', auth()->user()->id)->update([
-            'amount' => $transfer_amount
-        ]); //echo $user_wault_update; exit;
-        if($user_wault_update)
-        {
-            $wallet_history1 = WalletHistory::create([
-                'wallet_id' => $user_wallet['id'],
-                'amount' => $data['amount'],
-                'is_expanse' => 1,
-                'description' => $req->note,
+
+        if ((float) $senderWallet->amount < (float) $data['amount']) {
+            return $this->apiResponse([
+                'status' => 0,
+                'message' => 'Wallet have not enough amount.',
+            ]);
+        }
+
+        DB::beginTransaction();
+
+        try {
+            $senderWallet->update([
+                'amount' => (float) $senderWallet->amount - (float) $data['amount'],
             ]);
 
-            $in_amount_total = $data['amount'] + $get_user_wallet->amount;
-            $get_user_wault_update = DB::table('wallets')->where('user_id', $data['user_id'])->update([
-                'amount' => $in_amount_total
-            ]); //echo $get_user_wault_update; exit;
+            WalletHistory::create([
+                'wallet_id' => $senderWallet->id,
+                'amount' => $data['amount'],
+                'is_expanse' => 1,
+                'description' => $data['note'] ?? null,
+            ]);
 
-            if($get_user_wault_update)
-            {
-                $wallet_history2 = WalletHistory::create([
-                    'wallet_id' => $get_user_wallet['id'],
-                    'amount' => $data['amount'],
-                    'is_deposite' => 1,
-                    'description' => $req->note,
-                ]);
-                DB::commit();
-                return response([
-                    'status' => 1,
-                    'message' => 'Amount transfer successfully'
-                ]);
-            } else {
-                return response([
-                    'status' => 0,
-                    'message' => 'Amount transfer failed.'
-                ]);
-            }
-        } else {
-            return response([
+            $receiverWallet->update([
+                'amount' => (float) $receiverWallet->amount + (float) $data['amount'],
+            ]);
+
+            WalletHistory::create([
+                'wallet_id' => $receiverWallet->id,
+                'amount' => $data['amount'],
+                'is_deposite' => 1,
+                'description' => $data['note'] ?? null,
+            ]);
+
+            DB::commit();
+
+            return $this->apiResponse([
+                'status' => 1,
+                'message' => 'Amount transfer successfully',
+            ]);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+
+            return $this->apiResponse([
                 'status' => 0,
-                'message' => 'Amount transfer failed.'
+                'message' => 'Amount transfer failed.',
             ]);
         }
     }
 
     public function walletHistory()
     {
-        $wallet = Wallet::where('user_id', auth()->user()->id)->first();
-        $History = WalletHistory::where('wallet_id', $wallet->id)->get();
+        $wallet = $this->currentWallet();
 
-        return response([
+        if (!$wallet) {
+            return $this->walletNotFoundResponse();
+        }
+
+        $history = WalletHistory::where('wallet_id', $wallet->id)
+            ->orderByDesc('id')
+            ->get();
+
+        return $this->apiResponse([
             'status' => 1,
-            'history' => json_decode(json_encode($History), true)
+            'history' => $history->toArray(),
         ]);
     }
 
     public function walletNotification()
     {
-        $wallet = Wallet::where('user_id', auth()->user()->id)->first();
-        $History = WalletHistory::where('wallet_id', $wallet->id)->where('is_read', 0)->get();
+        $wallet = $this->currentWallet();
 
-        return response([
+        if (!$wallet) {
+            return $this->walletNotFoundResponse();
+        }
+
+        $history = WalletHistory::where('wallet_id', $wallet->id)
+            ->where('is_read', 0)
+            ->orderByDesc('id')
+            ->get();
+
+        return $this->apiResponse([
             'status' => 1,
-            'history' => json_decode(json_encode($History), true)
+            'history' => $history->toArray(),
         ]);
     }
 
     public function walletReadNotify($flag)
     {
-        if($flag == 'all')
-        {
-            $wallet = Wallet::where('user_id', auth()->user()->id)->first();
-            $update = DB::table('wallet_histories')->where('wallet_id', $wallet->id)->update(['is_read' => 1]);
-            if($update)
-            {
-                return response([
-                    'status' => 1,
-                    'msg' => 'All notifications read successfully.'
-                ]);
-            }
-        } else {
-            $update = DB::table('wallet_histories')->where('id', $flag)->update(['is_read' => 1]);
-            if($update)
-            {
-                return response([
-                    'status' => 1,
-                    'msg' => 'Notification read successfully.'
-                ]);
-            }
-        }
-        $wallet = Wallet::where('user_id', auth()->user()->id)->first();
-        $History = WalletHistory::where('wallet_id', $wallet->id)->where('is_read', 0)->get();
+        $wallet = $this->currentWallet();
 
-        return response([
+        if (!$wallet) {
+            return $this->walletNotFoundResponse();
+        }
+
+        if ($flag === 'all') {
+            DB::table('wallet_histories')
+                ->where('wallet_id', $wallet->id)
+                ->where('is_read', 0)
+                ->update(['is_read' => 1]);
+
+            return $this->apiResponse([
+                'status' => 1,
+                'msg' => 'All notifications read successfully.',
+            ]);
+        }
+
+        if (!is_numeric($flag)) {
+            return $this->apiResponse([
+                'status' => 0,
+                'msg' => 'Invalid notification id.',
+            ]);
+        }
+
+        $update = DB::table('wallet_histories')
+            ->where('wallet_id', $wallet->id)
+            ->where('id', (int) $flag)
+            ->update(['is_read' => 1]);
+
+        if ($update) {
+            return $this->apiResponse([
+                'status' => 1,
+                'msg' => 'Notification read successfully.',
+            ]);
+        }
+
+        $history = WalletHistory::where('wallet_id', $wallet->id)
+            ->where('is_read', 0)
+            ->orderByDesc('id')
+            ->get();
+
+        return $this->apiResponse([
             'status' => 1,
-            'history' => json_decode(json_encode($History), true)
+            'history' => $history->toArray(),
         ]);
     }
 
     public function recentTransactionHistory($limit)
     {
         $user = auth()->user();
-        if($user->user_type == 2)
-        {
-            $wallet = Wallet::where('user_id', $user->id)->first();
-            $offerIds = Offer::where('user_id', $user->id)->pluck('id');
-            $offerIds = json_decode(json_encode($offerIds), true);
-            if($limit > 0)
-            {
-                $requests = ModelsRequest::whereIn('offer_id', $offerIds)->where('status', 3)->limit($limit)
-                               ->get(['id', 'offer_id', 'parcel_address', 'receiver_address', 'amount']);
-            } else {
-                $requests = ModelsRequest::whereIn('offer_id', $offerIds)->where('status', 3)
-                ->get(['id', 'offer_id', 'parcel_address', 'receiver_address', 'amount']);
+        $limit = max(0, (int) $limit);
+
+        if ($user->user_type == 2) {
+            $wallet = $this->currentWallet();
+
+            if (!$wallet) {
+                return $this->walletNotFoundResponse();
             }
-            
+
+            $offerIds = Offer::where('user_id', $user->id)->pluck('id')->all();
+            $requestsQuery = ModelsRequest::whereIn('offer_id', $offerIds)->where('status', 3);
+
+            if ($limit > 0) {
+                $requestsQuery->limit($limit);
+            }
+
+            $requests = $requestsQuery->get(['id', 'offer_id', 'parcel_address', 'receiver_address', 'amount']);
+
             $earning = WalletHistory::where('wallet_id', $wallet->id)->where('is_deposite', 1)->sum('amount');
             $withDraw = WalletHistory::where('wallet_id', $wallet->id)->where('is_expanse', 1)->sum('amount');
 
-            return response()->json([
+            return $this->apiResponse([
                 'balance' => $wallet->amount,
                 'total_earning' => $earning,
                 'total_withdraw' => $withDraw,
-                'transactions' => $requests
+                'transactions' => $requests,
             ]);
         }
-            // $wallet = Wallet::where('user_id', $user->id)->first();
-            // $offerIds = Offer::where('user_id', $user->id)->pluck('id');
-            // $offerIds = json_decode(json_encode($offerIds), true);
-            if($limit > 0)
-            {
-                $requests = ModelsRequest::where('user_id', $user->id)->where('status', 3)->limit($limit)
-                               ->get(['id', 'offer_id', 'parcel_address', 'receiver_address', 'amount']);
-            } else {
-                $requests = ModelsRequest::where('user_id', $user->id)->where('status', 3)
-                ->get(['id', 'offer_id', 'parcel_address', 'receiver_address', 'amount']);
-            }
-            
-            // $earning = WalletHistory::where('wallet_id', $wallet->id)->where('is_deposite', 1)->sum('amount');
-            // $withDraw = WalletHistory::where('wallet_id', $wallet->id)->where('is_expanse', 1)->sum('amount');
 
-            return response()->json([
-                // 'balance' => $wallet->amount,
-                // 'total_earning' => $earning,
-                // 'total_withdraw' => $withDraw,
-                'transactions' => $requests
-            ]);
+        $requestsQuery = ModelsRequest::where('user_id', $user->id)->where('status', 3);
+
+        if ($limit > 0) {
+            $requestsQuery->limit($limit);
+        }
+
+        $requests = $requestsQuery->get(['id', 'offer_id', 'parcel_address', 'receiver_address', 'amount']);
+
+        return $this->apiResponse([
+            'transactions' => $requests,
+        ]);
     }
 }
