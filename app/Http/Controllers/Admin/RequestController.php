@@ -270,10 +270,10 @@ class RequestController extends Controller
                 $wdata['code'] = $req->request_id."|".generateRandomCode();
                 $request = DB::table('requests')->where('id', $req->request_id)->update([
                     'invoice_id' => $payment['invoice_id'],
-                    'offer_id' => $req->offer_id,
+                    // 'offer_id' => $req->offer_id,
                     'amount' => $req->amount,
-                    'status' => 1,
-                    'code' => $wdata['code'],
+                    // 'status' => 1,
+                    // 'code' => $wdata['code'],
                     "payment_method" => $req->payment_method
                 ]);
                 if($request)
