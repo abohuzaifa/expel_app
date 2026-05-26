@@ -39,10 +39,10 @@ use App\Http\Controllers\BankController;
 */
 Route::post('/login', [LoginController::class, 'login'])->name('login');
 Route::get('lang/{locale}', [LangController::class, 'setLocale'])->name('setLocale');
-Route::post('/success/{id}/{offer_id}', [SuccessController::class, 'index'])->name('success');
+Route::match(['get', 'post'], '/success/{id}/{offer_id}', [SuccessController::class, 'index'])->name('success');
 Route::get('/address', [AddressController::class, 'showMap'])->name('address');
 Route::post('/address/save', [AddressController::class, 'saveAddress'])->name('address.save');
-Route::get('/charge_in/{id}', [SuccessController::class, 'charge_in'])->name('charge_in');
+Route::match(['get', 'post'], '/charge_in/{id}', [SuccessController::class, 'charge_in'])->name('charge_in');
 Route::get('/privacy-policy', [PageController::class, 'privacyPolicy'])->name('privacy.policy');
 Route::get('/contact-us', [ContactController::class, 'index'])->name('contact');
 Route::post('/contact-us', [ContactController::class, 'store'])->name('contact.store');
