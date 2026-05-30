@@ -226,7 +226,8 @@ class CategoryController extends Controller
 
             $offers = Offer::with([
                 'request' => function ($query) {
-                    $query->select('id', 'user_id', 'parcel_lat', 'parcel_long', 'parcel_address', 'receiver_lat', 'receiver_long', 'receiver_address');
+                    $query->select('id', 'user_id', 'parcel_lat', 'parcel_long', 'parcel_address', 'receiver_lat', 'receiver_long', 'receiver_address')
+                          ->where('status', '!=', 3);
                 },
                 'user' => function ($query) {
                     $query->select('id', 'name', 'email', 'mobile', 'latitude', 'longitude', 'street_address');
