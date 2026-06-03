@@ -369,7 +369,8 @@ class RequestController extends Controller
                     $request = DB::table('requests')->where('id', $req->request_id)->update([
                         'offer_id' => $req->offer_id,
                         'amount' => $req->amount,
-                        'payment_status' => 1
+                        'payment_status' => 1,
+                        'status' => 1
                     ]);
                         if($request)
                         {
