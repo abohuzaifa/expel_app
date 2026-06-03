@@ -540,30 +540,30 @@ class RequestController extends Controller
         // Validate request exists
         $request = ModelRequest::where('id', $id)->first();
         if (!$request) {
-            return response()->json(['msg' => 'Code does not match']);
+            return response()->json(['status' => 'fail','msg' => 'Code does not match']);
         }
         
         // Validate payment method exists
         $paymentMethod = PaymentMethod::find($request->payment_method);
         if (!$paymentMethod) {
-            return response()->json(['msg' => 'No payment method found']);
+            return response()->json(['status' => 'fail','msg' => 'No payment method found']);
         }
         
         // Validate payment status
         if (!isset($request->payment_status) || $request->payment_status != 1) {
-            return response()->json(['msg' => 'Did you received payment, If received then press YES Or NOT']);
+            return response()->json(['status' => 'fail','msg' => 'Did you received payment, If received then press YES Or NOT']);
         }
         
         // Validate offer exists
         $offer = Offer::where('is_accept', 1)->find($request->offer_id);
         if (!$offer || !$offer->id) {
-            return response()->json(['msg' => 'Offer not found']);
+            return response()->json(['status' => 'fail','msg' => 'Offer not found']);
         }
         
         // Validate driver wallet exists
         $wallet = Wallet::where('user_id', $offer->user_id)->first();
         if (!$wallet || $wallet->id <= 0) {
-            return response()->json(['msg' => 'Driver wallet not found']);
+            return response()->json(['status' => 'fail','msg' => 'Driver wallet not found']);
         }
         
         // Update request status to completed
@@ -586,7 +586,7 @@ class RequestController extends Controller
             ->update(['amount' => $newWalletAmount]);
         
         if (!$walletUpdate) {
-            return response()->json(['msg' => 'Wallet updation faild']);
+            return response()->json(['status' => 'fail','msg' => 'Wallet updation faild']);
         }
         
         // Create wallet history record
@@ -605,7 +605,7 @@ class RequestController extends Controller
         $walletHistory = WalletHistory::create($historyData);
         
         if (!$walletHistory) {
-            return response()->json(['msg' => 'History not created of current request']);
+            return response()->json(['status' => 'fail','msg' => 'History not created of current request']);
         }
         
         // Send notifications based on payment method
