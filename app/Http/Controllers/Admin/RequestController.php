@@ -372,7 +372,8 @@ class RequestController extends Controller
                         'amount' => $req->amount,
                         'payment_status' => 1,
                         'status' => 1,
-                        'code' => $wdata['code']
+                        'code' => $wdata['code'],
+                        "payment_method" => $req->payment_method
                     ]);
                         if($request)
                         {
@@ -393,6 +394,7 @@ class RequestController extends Controller
                                 {
                                     
                                     $offer = Offer::find($req->offer_id);
+                                    Offer::where('id', $req->offer_id)->update(['is_accept' => 1]);
                                     $driver = User::find($offer->user_id);
                                     User::storeAppNotification(
                                         $offer->user_id,
