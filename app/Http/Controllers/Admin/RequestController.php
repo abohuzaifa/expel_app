@@ -611,7 +611,7 @@ class RequestController extends Controller
         // Send notifications based on payment method
         $notifications = $this->sendRequestCompletionNotifications($request, $paymentMethod, $amountToProcess);
         
-        return response()->json(['msg' => 'Request status update successfully', 'fcm' => $notifications]);
+        return response()->json(['status' => 'success', 'msg' => 'Request status update successfully', 'fcm' => $notifications]);
     }
     
     private function sendRequestCompletionNotifications($request, $paymentMethod, $amountToProcess)
