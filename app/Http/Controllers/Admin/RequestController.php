@@ -454,9 +454,13 @@ class RequestController extends Controller
     public function allTrips()
     {
         $user = auth()->user();
-
-        $requests = ModelRequest::with('user')->where('status', 0)
-        ->where('parcel_address', 'like', '%' . $user->city . '%')->paginate(10);
+        if($user->user_type == 1)
+        {
+            $requests = ModelRequest::with('user')->where('user_id', $user->id)->where('status', 3)->paginate(10);
+        } else {
+            $offerIds = Offer::where('user_id', $user->id)->where('is_accept', 1)->pluck('id')->toArray();
+            $requests = ModelRequest::with('user')->whereIn('offer_id', $offerIds)->where('status', 3)->paginate(10);
+        }
 
         return response()->json(['data' => $requests]);
     }
