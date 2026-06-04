@@ -159,7 +159,11 @@ class AuthController extends Controller
             'driving_license_image' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:10240',
             'vehicle_registration_image' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:10240',
         ]);
-
+        $file_name = "";
+        if(isset($_FILES['image']))
+        {
+            $file_name = $this->upload($req);
+        }
         $randomNumber = rand(100000, 999999);
         $drivingLicenseImage = $this->uploadDocument($req, 'driving_license_image');
         $vehicleRegistrationImage = $this->uploadDocument($req, 'vehicle_registration_image');
@@ -182,6 +186,7 @@ class AuthController extends Controller
             "bank_account" => $req->bank_account,
             "name_ar" => $req->name_ar,
             'iban' => $req->iban,
+            "image"=> $file_name,
             'verification_status' => 'pending',
         ]);
 
