@@ -172,7 +172,7 @@ class AuthController extends Controller
             "password"=> bcrypt($attrs["password"]),
             "otp"=> $randomNumber,
             "street_address" => $req->address,
-            "status"=> 1,
+            "status"=> 0,
             "category_id" => $req->vehicle_type,
             'number_plate' => $req->number_plate,
             "driving_license" => $req->driving_license ?? "",
