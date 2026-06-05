@@ -231,7 +231,17 @@ return [
 'email' => 'Email',
 'subject' => 'Subject',
 'message' => 'Message',
-'send_message' => 'Send Message',
-
+    'send_message' => 'Send Message',
+    'request' => 'Request',
+    'request_list' => 'Request List',
+    'request_tracking' => 'Request Tracking',
+    'from' => 'From',
+    'to' => 'To',
+    'driver' => 'Driver',
+    'all_status' => 'All Status',
+    'search' => 'Search',
+    'no_records_found' => 'No records found',
+    'no_notifications' => 'No new notifications',
+    'unknown' => 'Unknown',
 
 ];

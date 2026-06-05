@@ -38,7 +38,7 @@
           </a>
         </li>
         <li>
-          <a href="{{route('request.create')}}">
+          <a href="{{route('request.index')}}?status=1">
             <i class="bi bi-circle"></i><span>{{trans('lang.request_tracking')}}</span>
           </a>
         </li>

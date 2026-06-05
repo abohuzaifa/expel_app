@@ -209,7 +209,14 @@ return [
 'email' => 'البريد الإلكتروني',
 'subject' => 'الموضوع',
 'message' => 'الرسالة',
-'send_message' => 'إرسال الرسالة',
-
+    'send_message' => 'إرسال الرسالة',
+    'from' => 'من',
+    'to' => 'إلى',
+    'driver' => 'السائق',
+    'all_status' => 'جميع الحالات',
+    'search' => 'بحث',
+    'no_records_found' => 'لا توجد سجلات',
+    'no_notifications' => 'لا توجد إشعارات جديدة',
+    'unknown' => 'غير معروف',
 
 ];

@@ -10,9 +10,20 @@
     </div><!-- End Logo -->
 <?php
 
+  use App\Models\Notification as NotificationModel;
   use Illuminate\Support\Facades\DB;
 
-  $new_users = DB::select('SELECT id,name, user_type, created_at FROM users WHERE is_read =0 AND user_type != 0 ORDER BY id DESC'); ?>
+  $new_users = DB::select('SELECT id,name, user_type, created_at FROM users WHERE is_read =0 AND user_type != 0 ORDER BY id DESC');
+  
+  // Get app notifications (from notifications table) that are unread
+  $app_notifications = NotificationModel::where('is_read', 0)
+      ->where('user_id', Auth::id())
+      ->orderBy('id', 'desc')
+      ->limit(10)
+      ->get();
+  
+  $total_notifications = count($new_users) + count($app_notifications);
+?>
     <div class="search-bar">
       <form class="search-form d-flex align-items-center" method="POST" action="#">
         <input type="text" name="query" placeholder="Search" title="Enter search keyword">
@@ -34,53 +45,72 @@
         <li class="nav-item dropdown">
           <a class="nav-link nav-icon" href="#" data-bs-toggle="dropdown">
             <i class="bi bi-bell"></i>
-            <span class="badge bg-primary badge-number">{{count($new_users)}}</span>
+            <span class="badge bg-primary badge-number">{{$total_notifications}}</span>
           </a><!-- End Notification Icon -->
 
           <ul class="dropdown-menu {{ app()->isLocale('ar') ? 'dropdown-menu-start' : 'dropdown-menu-end' }} dropdown-menu-arrow notifications">
             <li class="dropdown-header">
-            {{trans('lang.you_have')}} {{count($new_users)}} {{trans('lang.new_notifications')}}
+            {{trans('lang.you_have')}} {{$total_notifications}} {{trans('lang.new_notifications')}}
               <a href="{{ route('notifications.edit',['all', "choice" => "is_read"]) }}"><span class="badge rounded-pill bg-primary p-2 ms-2">{{trans('lang.read_all')}}</span></a>
             </li>
             <li>
               <hr class="dropdown-divider">
             </li>
-          <?php foreach($new_users as $key => $row) {
-              if($row->user_type == 1)
-              {
-                echo '
+          
+          {{-- App Notifications (from notifications table) --}}
+          @foreach($app_notifications as $notification)
+            <li class="notification-item">
+              <i class="bi bi-bell text-primary"></i>
+              <a href="{{ route('notifications.edit', [$notification->id, 'choice' => 'is_read']) }}">
+              <div>
+                <h4>{{ Str::limit($notification->message, 40) }}</h4>
+                <p><small>{{ $notification->created_at ? \Carbon\Carbon::parse($notification->created_at)->diffForHumans() : '' }}</small></p>
+              </div>
+              </a>
+            </li>
+            <li>
+              <hr class="dropdown-divider">
+            </li>
+          @endforeach
+
+          {{-- New User Registrations --}}
+          @foreach($new_users as $key => $row)
+              @if($row->user_type == 1)
                 <li class="notification-item">
-                  <i class="bi bi-exclamation-circle text-warning"></i>
-                  <a href="'. route('notifications.edit',[$row->id]) .'">
+                  <i class="bi bi-person-plus text-success"></i>
+                  <a href="{{ route('notifications.edit',[$row->id]) }}">
                   <div>
-                    <h4>'.trans('lang.new_seller').' <a href="'. route('notifications.edit',[$row->id, "choice" => "is_read"]) .'" style="'.(app()->isLocale('ar') ? "margin-right:50px;" : "margin-left:100px;").'" class="text-sm" href="#"><small>'.trans('lang.read').'</small></a></h4>
-                    <p>'.$row->name.' '.trans('lang.new_seller_msg').'</p>
-                    <p>'.formatCreatedAt($row->created_at).'</p>
+                    <h4>{{trans('lang.new_seller')}} <a href="{{ route('notifications.edit',[$row->id, "choice" => "is_read"]) }}" style="{{ app()->isLocale('ar') ? 'margin-right:50px;' : 'margin-left:100px;' }}" class="text-sm" href="#"><small>{{trans('lang.read')}}</small></a></h4>
+                    <p>{{$row->name}} {{trans('lang.new_seller_msg')}}</p>
+                    <p>{{ formatCreatedAt($row->created_at) }}</p>
                   </div>
                   </a>
                 </li>
                 <li>
                   <hr class="dropdown-divider">
-                </li>';
-              } else {
-                echo '
+                </li>
+              @else
                 <li class="notification-item">
-                  <i class="bi bi-exclamation-circle text-warning"></i>
-                  <a href="'. route('notifications.edit',[$row->id]) .'">
+                  <i class="bi bi-person-plus text-info"></i>
+                  <a href="{{ route('notifications.edit',[$row->id]) }}">
                   <div>
-                    <h4>'.trans('lang.new_buyer').' <a href="'. route('notifications.edit',[$row->id, "choice" => "is_read"]) .'" style="'.(app()->isLocale('ar') ? "margin-right:70px;" : "margin-left:100px;").'" class="text-sm" href="#"><small>'.trans('lang.read').'</small></a></h4>
-                    <p>'.$row->name.' '.trans('lang.new_buyer_msg').'</p>
-                    <p>'.formatCreatedAt($row->created_at).'</p>
+                    <h4>{{trans('lang.new_buyer')}} <a href="{{ route('notifications.edit',[$row->id, "choice" => "is_read"]) }}" style="{{ app()->isLocale('ar') ? 'margin-right:70px;' : 'margin-left:100px;' }}" class="text-sm" href="#"><small>{{trans('lang.read')}}</small></a></h4>
+                    <p>{{$row->name}} {{trans('lang.new_buyer_msg')}}</p>
+                    <p>{{ formatCreatedAt($row->created_at) }}</p>
                   </div>
                   </a>
                 </li>
                 <li>
                   <hr class="dropdown-divider">
-                </li>';
-              }
-          }
-            ?>
-            
+                </li>
+              @endif
+          @endforeach
+          
+          @if($total_notifications == 0)
+            <li class="notification-item text-center">
+              <p class="text-muted mb-0">{{ trans('lang.no_notifications') }}</p>
+            </li>
+          @endif
 
           </ul><!-- End Notification Dropdown Items -->
 
