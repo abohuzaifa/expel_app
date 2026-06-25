@@ -19,6 +19,7 @@ use App\Http\Controllers\Admin\WalletController;
 use App\Http\Controllers\Admin\NotificationApiController;
 use App\Http\Controllers\Admin\NotificationSettingController;
 use App\Http\Controllers\BannerController;
+use App\Http\Controllers\ClickPayController;
 use App\Http\Controllers\Location;
 
 /*
@@ -54,6 +55,10 @@ Route::get('/adminChoiceCategories', [CategoryController::class,'adminChoiceCate
 Route::post('/test', [RequestController::class, 'test'])->name('test');
 Route::get('/cities', [TripController::class, 'cities'])->name('cities');
 Route::post('/receiverAddressUpdate', [RequestController::class, 'receiverAddressUpdate'])->name('receiverAddressUpdate');
+
+// ClickPay routes (no auth required)
+Route::post('/clickpay/create-invoice', [ClickPayController::class, 'createInvoice'])->name('clickpay.createInvoice');
+Route::post('/clickpay/check-status', [ClickPayController::class, 'checkStatus'])->name('clickpay.checkStatus');
 
 // protected routes
 Route::group(["middleware"=> "auth:sanctum"], function () {

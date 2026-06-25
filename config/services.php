@@ -31,4 +31,9 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'clickpay' => [
+        'profile_id' => env('CLICKPAY_PROFILE_ID'),
+        'secret_key' => env('CLICKPAY_SECRET_KEY'),
+    ],
+
 ];
